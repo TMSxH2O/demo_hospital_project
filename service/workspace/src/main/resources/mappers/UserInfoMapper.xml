@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hospital.xhu.demo.dao.IUserInfoMapper">
+    <resultMap type="com.hospital.xhu.demo.entity.UserInfo" id="usermap">
+        <id column="username" property="username"/>
+        <result column="user_pwd" property="password"/>
+        <result column="user_pwd_salt" property="passwordSalt"/>
+        <result column="user_email" property="email"/>
+        <result column="user_phone" property="phone"/>
+        <result column="user_is_login" property="isLogin"/>
+        <result column="user_last_login_time" property="lastLoginTime"/>
+        <result column="user_image_uri" property="userImageUri"/>
+    </resultMap>
+
+    <!--测试专用方法，查询所有用户信息-->
+    <select id="testSelectAll" resultMap="usermap">
+        SELECT username, user_pwd, user_pwd_salt, user_email, user_phone, user_is_login, user_last_login_time, user_image_uri
+        FROM user_info
+	</select>
+
+    <!--查询满足条件的用户-->
+    <select id="selectUserInfoByMap" resultMap="usermap" parameterType="map">
+        SELECT username, user_pwd, user_pwd_salt, user_email, user_phone, user_is_login, user_last_login_time, user_image_uri
+        FROM user_info
+        <where>
+            <if test="searchMap != null">
+                <foreach collection="searchMap.entrySet()" separator="and" index="key" item="value">
+                    ${key} = #{value}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <!--添加用户的列表-->
+    <insert id="insertUserInfo" parameterType="list">
+        INSERT INTO
+            user_info(username, user_pwd, user_pwd_salt, user_email,
+                      user_phone, user_is_login, user_last_login_time, user_image_uri)
+        VALUES
+        <foreach collection="userInfos" open="(" close=")" separator="," item="item">
+            #{item.username}, #{item.password}, #{item.passwordSalt}, #{item.email},
+            #{item.phone}, #{item.isLogin}, #{item.lastLoginTime}, #{item.userImageUri}
+        </foreach>
+    </insert>
+
+    <!--更新满足的条件的用户的信息-->
+    <update id="updateUserInfo" parameterType="map">
+        UPDATE user_info SET
+        <foreach collection="after.entrySet()" separator="," index="key" item="value">
+            ${key}=#{value}
+        </foreach>
+        <where>
+            <if test="before != null">
+                <foreach collection="before.entrySet()" separator="and" index="key" item="value">
+                    ${key}=#{value}
+                </foreach>
+            </if>
+        </where>
+    </update>
+
+    <!--删除满足一定条件的用户，需要之后进行封装，最好不要传空Map进来，不然会直接删除所有的数据-->
+    <delete id="deleteUserInfo" parameterType="map">
+        DELETE FROM user_info
+        <where>
+            <if test="deleteMap != null">
+                <foreach collection="deleteMap.entrySet()" separator="and" index="key" item="value">
+                    ${key}=#{value}
+                </foreach>
+            </if>
+        </where>
+    </delete>
+</mapper>
