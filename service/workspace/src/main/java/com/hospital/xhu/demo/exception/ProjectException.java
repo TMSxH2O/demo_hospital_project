@@ -1,6 +1,7 @@
 package com.hospital.xhu.demo.exception;
 
 import com.hospital.xhu.demo.utils.CommonResult;
+import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,6 +20,6 @@ public class ProjectException extends Exception {
     }
 
     public CommonResult<Object> getResult() {
-        return new CommonResult<>(code.getCode(), msg, null);
+        return new CommonResult<>(code.getCode(), msg);
     }
 }

@@ -17,4 +17,10 @@ public class CommonResult<T> {
     private final int code;
     private final String msg;
     private final T data;
+
+    public CommonResult(int code, String msg) {
+        this.code = code;
+        this.msg = msg;
+        this.data = null;
+    }
 }

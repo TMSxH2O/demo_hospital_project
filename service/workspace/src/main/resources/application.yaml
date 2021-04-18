@@ -16,3 +16,7 @@ mybatis:
   type-aliases-package: com.hospital.xhu.demo.entity
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 显示MyBatis的log信息到控制台
+
+cache:
+  user_info: 1000
+

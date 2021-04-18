@@ -32,7 +32,10 @@ public interface IUserInfoMapper {
      * @param map key为所查询的字段名，value为对应的值（必须可以进行转换）
      * @return 符合条件的所有用户的信息
      */
-    List<UserInfo> selectUserInfoByMap(@Param("searchMap") Map<String, String> map);
+    List<UserInfo> selectUserInfoByMap(
+            @Param("searchMap") Map<String, String> map,
+            @Param("orderedKey") String orderedKey,
+            @Param("isDesc") Boolean isDesc);
 
     /**
      * 添加新的用户的方法

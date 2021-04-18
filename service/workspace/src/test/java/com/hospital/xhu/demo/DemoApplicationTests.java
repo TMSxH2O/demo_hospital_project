@@ -24,7 +24,7 @@ class DemoApplicationTests {
         // 时间可以直接利用 LocalDateTime 的 toString 来得到
         LocalDateTime testTime = LocalDateTime.of(1000, 1, 1, 0, 0, 0);
         test.put("user_last_login_time", testTime.toString());
-        System.out.println(userInfoMapper.selectUserInfoByMap(test));
+        System.out.println(userInfoMapper.selectUserInfoByMap(null, "username", null));
     }
 
     @Test
@@ -37,8 +37,8 @@ class DemoApplicationTests {
     void testUserInfoUpdate() {
         Map<String, String> before = new HashMap<>();
         Map<String, String> after = new HashMap<>();
-        before.put("user_phone", "1");
-        after.put("user_pwd", "123456");
+        before.put("user_pwd", "123");
+//        after.put("user_pwd", "123456");
         after.put("user_pwd_salt", "123456");
         System.out.println(userInfoMapper.updateUserInfo(before, after));
     }

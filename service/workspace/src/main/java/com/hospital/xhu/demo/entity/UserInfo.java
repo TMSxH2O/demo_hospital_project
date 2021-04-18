@@ -1,9 +1,10 @@
 package com.hospital.xhu.demo.entity;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 
@@ -34,6 +35,35 @@ public class UserInfo {
     private String email;
     private Long phone;
     private Boolean isLogin;
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastLoginTime;
     private String userImageUri;
+
+    /**
+     * 对用户信息进行初始化
+     * 只能在用户初始化之后进行操作（由客户端注册时传入的不完整的用户信息）
+     */
+    public void initUserInfo() {
+        // 邮箱为空
+        if (StringUtils.isEmpty(email)) {
+            email = "";
+        }
+        // 用户电话为空
+        if (null == phone) {
+            phone = 11111111111L;
+        }
+        // 用户是否登录为空
+        if (null == isLogin) {
+            isLogin = false;
+        }
+        // 用户最后登录的时间为空
+        if (null == lastLoginTime) {
+            // 默认为当前时间
+            lastLoginTime = LocalDateTime.now();
+        }
+        // 用户头像地址为空
+        if (StringUtils.isEmpty(userImageUri)) {
+            userImageUri = "";
+        }
+    }
 }

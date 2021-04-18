@@ -17,13 +17,21 @@
 
     <!--测试专用方法，查询所有用户信息-->
     <select id="testSelectAll" resultMap="usermap">
-        SELECT username, user_pwd, user_pwd_salt, user_email, user_phone, user_is_login, user_last_login_time, user_image_uri
+        SELECT username,
+               user_pwd,
+               user_pwd_salt,
+               user_email,
+               user_phone,
+               user_is_login,
+               user_last_login_time,
+               user_image_uri
         FROM user_info
-	</select>
+    </select>
 
     <!--查询满足条件的用户-->
     <select id="selectUserInfoByMap" resultMap="usermap" parameterType="map">
-        SELECT username, user_pwd, user_pwd_salt, user_email, user_phone, user_is_login, user_last_login_time, user_image_uri
+        SELECT username, user_pwd, user_pwd_salt, user_email, user_phone, user_is_login, user_last_login_time,
+        user_image_uri
         FROM user_info
         <where>
             <if test="searchMap != null">
@@ -32,13 +40,19 @@
                 </foreach>
             </if>
         </where>
+        <if test="orderedKey != null and orderedKey != ''">
+            ORDER BY ${orderedKey}
+        </if>
+        <if test="isDesc != null and isDesc">
+            DESC
+        </if>
     </select>
 
     <!--添加用户的列表-->
     <insert id="insertUserInfo" parameterType="list">
-        INSERT INTO
-            user_info(username, user_pwd, user_pwd_salt, user_email,
-                      user_phone, user_is_login, user_last_login_time, user_image_uri)
+        INSERT IGNORE INTO
+        user_info(username, user_pwd, user_pwd_salt, user_email,
+        user_phone, user_is_login, user_last_login_time, user_image_uri)
         VALUES
         <foreach collection="userInfos" open="(" close=")" separator="," item="item">
             #{item.username}, #{item.password}, #{item.passwordSalt}, #{item.email},
