@@ -11,11 +11,12 @@ import org.apache.tomcat.jni.Time;
  * @date 2021/4/18
  */
 public class EntityCache<T> {
-    private long time;
     private final T data;
+    private long time;
 
     /**
      * 初始化时自动存储当前时间
+     *
      * @param data 缓存数据
      */
     public EntityCache(T data) {
@@ -28,9 +29,18 @@ public class EntityCache<T> {
      *
      * @return 缓存的数据
      */
-    T getData() {
+    public T getData() {
         time = Time.now();
         return data;
+    }
+
+    /**
+     * 获取缓冲的更新时间
+     *
+     * @return 时间
+     */
+    public long getTime() {
+        return time;
     }
 
     /**
@@ -38,7 +48,7 @@ public class EntityCache<T> {
      *
      * @return 缓存的数据
      */
-    T getDataNotUpdate() {
+    public T getDataNotUpdate() {
         return data;
     }
 }

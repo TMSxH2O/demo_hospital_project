@@ -3,34 +3,17 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.hospital.xhu.demo.dao.IUserInfoMapper">
-    <resultMap type="com.hospital.xhu.demo.entity.UserInfo" id="usermap">
-        <id column="username" property="username"/>
-        <result column="user_pwd" property="password"/>
-        <result column="user_pwd_salt" property="passwordSalt"/>
-        <result column="user_email" property="email"/>
-        <result column="user_phone" property="phone"/>
-        <result column="user_last_login_time" property="lastLoginTime"/>
-        <result column="user_image_uri" property="userImageUri"/>
+<mapper namespace="com.hospital.xhu.demo.dao.IDepartmentInfoMapper">
+    <resultMap type="com.hospital.xhu.demo.entity.DepartmentInfo" id="departmentMap">
+        <id column="department_id" property="id"/>
+        <result column="hospital_id" property="hospitalId"/>
+        <result column="department_name" property="departmentName"/>
     </resultMap>
 
-    <!--测试专用方法，查询所有用户信息-->
-    <select id="testSelectAll" resultMap="usermap">
-        SELECT username,
-               user_pwd,
-               user_pwd_salt,
-               user_email,
-               user_phone,
-               user_last_login_time,
-               user_image_uri
-        FROM user_info
-    </select>
-
-    <!--查询满足条件的用户-->
-    <select id="select" resultMap="usermap" parameterType="map">
-        SELECT username, user_pwd, user_pwd_salt, user_email, user_phone, user_last_login_time,
-        user_image_uri
-        FROM user_info
+    <!--查询满足条件的科室-->
+    <select id="select" resultMap="departmentMap" parameterType="map">
+        SELECT department_id, hospital_id, department_name
+        FROM department_info
         <where>
             <if test="searchMap != null">
                 <foreach collection="searchMap.entrySet()" separator="and" index="key" item="value">
@@ -46,11 +29,10 @@
         </if>
     </select>
 
-    <!--添加用户的列表-->
+    <!--添加科室的列表-->
     <insert id="insert" parameterType="list">
         INSERT IGNORE INTO
-        user_info(username, user_pwd, user_pwd_salt, user_email,
-        user_phone, user_last_login_time, user_image_uri)
+        department_info(department_id, hospital_id, department_name)
         VALUES
         <foreach collection="infos" open="(" close=")" separator="," item="item">
             #{item.username}, #{item.password}, #{item.passwordSalt}, #{item.email},
@@ -58,9 +40,9 @@
         </foreach>
     </insert>
 
-    <!--更新满足的条件的用户的信息-->
+    <!--更新满足的条件的科室的信息-->
     <update id="update" parameterType="map">
-        UPDATE user_info SET
+        UPDATE department_info SET
         <foreach collection="after.entrySet()" separator="," index="key" item="value">
             ${key}=#{value}
         </foreach>
@@ -73,9 +55,9 @@
         </where>
     </update>
 
-    <!--删除满足一定条件的用户，需要之后进行封装，最好不要传空Map进来，不然会直接删除所有的数据-->
+    <!--删除满足一定条件的医院科室信息，需要之后进行封装，最好不要传空Map进来，不然会直接删除所有的数据-->
     <delete id="delete" parameterType="map">
-        DELETE FROM user_info
+        DELETE FROM department_info
         <where>
             <if test="deleteMap != null">
                 <foreach collection="deleteMap.entrySet()" separator="and" index="key" item="value">

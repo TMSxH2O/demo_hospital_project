@@ -24,7 +24,7 @@ public class UserInfoUtils {
      * @param username 用户名
      * @return 用户名的Map
      */
-    public static Map<String, String> tempUsernameMap(String username) {
+    public static Map<String, Object> tempUsernameMap(String username) {
         return Collections.singletonMap("username", username);
     }
 
@@ -32,7 +32,7 @@ public class UserInfoUtils {
      * 返回上次更新时间为现在的 Map
      * @return { "lastLoginTime", now() }
      */
-    public static Map<String, String> lastLoginTimeNowMap(Map<String, String> map) {
+    public static Map<String, Object> lastLoginTimeNowMap(Map<String, Object> map) {
         if (null == map) {
             map = new HashMap<>(1);
         }
@@ -45,7 +45,7 @@ public class UserInfoUtils {
      * @param isLogin 登录状态
      * @return { "isLogin", "0"/"1" }
      */
-    public static Map<String, String> userIsLoginMap(Map<String, String> map, boolean isLogin) {
+    public static Map<String, Object> userIsLoginMap(Map<String, Object> map, boolean isLogin) {
         if (null == map) {
             map = new HashMap<>(1);
         }

@@ -18,14 +18,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class UserInfo {
+public class UserInfo implements Entity {
     /**
      * username         用户名，不可重复，登录时使用（担任id的功能）
      * password         用户密码，MD5加密，登录时使用
      * passwordSalt     用户密码加密过程中产生的盐，用于密码校验
      * email            用户的邮箱，可以用于找回密码（可能不做这个功能）
      * phone            用户的手机号，可以用于找回密码（可能不做这个功能）
-     * isLogin          用户是否登录，0表示未登录，1表示已登录
      * lastLoginTime    用户最后登录时间（可能不需要）
      * userImageUri     用户头像图片路径（相对路径）
      */
@@ -34,7 +33,6 @@ public class UserInfo {
     private String passwordSalt;
     private String email;
     private Long phone;
-    private Boolean isLogin;
     @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastLoginTime;
     private String userImageUri;
@@ -43,7 +41,8 @@ public class UserInfo {
      * 对用户信息进行初始化
      * 只能在用户初始化之后进行操作（由客户端注册时传入的不完整的用户信息）
      */
-    public void initUserInfo() {
+    @Override
+    public void init() {
         // 邮箱为空
         if (StringUtils.isEmpty(email)) {
             email = "";
@@ -51,10 +50,6 @@ public class UserInfo {
         // 用户电话为空
         if (null == phone) {
             phone = 11111111111L;
-        }
-        // 用户是否登录为空
-        if (null == isLogin) {
-            isLogin = false;
         }
         // 用户最后登录的时间为空
         if (null == lastLoginTime) {

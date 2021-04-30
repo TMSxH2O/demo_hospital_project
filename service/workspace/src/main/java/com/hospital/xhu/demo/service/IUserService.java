@@ -3,6 +3,7 @@ package com.hospital.xhu.demo.service;
 import com.hospital.xhu.demo.entity.UserInfo;
 import com.hospital.xhu.demo.utils.CommonResult;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -49,7 +50,7 @@ public interface IUserService {
      * @return 符合条件的用户信息列表
      */
     CommonResult<Object> selectUserInfo(
-            Map<String, String> map, Integer pageNum, Integer pageSize,
+            Map<String, Object> map, Integer pageNum, Integer pageSize,
             String orderedKey, Boolean isDesc);
 
     /**
@@ -59,5 +60,21 @@ public interface IUserService {
      * @param newValueMap 修改的值
      * @return 修改的结果
      */
-    CommonResult<Object> updateUserInfo(Map<String, String> selectKey, Map<String, String> newValueMap);
+    CommonResult<Object> updateUserInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap);
+
+    /**
+     * 插入新的用户数据
+     *
+     * @param userInfo 用户数据列表
+     * @return 插入的结果
+     */
+    CommonResult<Object> insertUserInfo(List<UserInfo> userInfo);
+
+    /**
+     * 删除用户的数据
+     *
+     * @param deleteKey 需要删除的用户数据
+     * @return 删除的结果
+     */
+    CommonResult<Object> deleteUserInfo(Map<String, Object> deleteKey);
 }

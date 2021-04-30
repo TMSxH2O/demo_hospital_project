@@ -12,7 +12,7 @@ import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
  */
 public class ProjectException extends Exception {
     private final ExceptionCode code;
-    private String msg;
+    private final String msg;
 
     public ProjectException(ExceptionCode code, String msg) {
         this.code = code;

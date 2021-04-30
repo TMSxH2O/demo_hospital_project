@@ -18,5 +18,6 @@ mybatis:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 显示MyBatis的log信息到控制台
 
 cache:
-  user_info: 1000
+  cache_size: 1000
+  limit_time: 1200  # LRU删除的时间
 

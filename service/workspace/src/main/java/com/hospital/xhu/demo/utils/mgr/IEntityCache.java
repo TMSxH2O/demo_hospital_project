@@ -1,5 +1,7 @@
 package com.hospital.xhu.demo.utils.mgr;
 
+import com.hospital.xhu.demo.exception.ProjectException;
+
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +24,7 @@ public interface IEntityCache<T> {
      * @param isDesc        Optional 是否反向
      * @return 查询的对象列表
      */
-    List<T> select(Map<String, String> map, Integer pageNum, Integer pageSize, String orderedKey, Boolean isDesc);
+    List<T> select(Map<String, Object> map, Integer pageNum, Integer pageSize, String orderedKey, Boolean isDesc) throws ProjectException;
 
     /**
      * 更新实体的通用模板
