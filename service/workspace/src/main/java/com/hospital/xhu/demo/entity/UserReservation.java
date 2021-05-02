@@ -5,6 +5,7 @@ import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
@@ -27,6 +28,7 @@ public class UserReservation implements Entity {
     private String id;
     private Long userId;
     private Long doctorId;
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDate reservationDate;
     private Float reservationPrice;
     private Integer reservationStatus;

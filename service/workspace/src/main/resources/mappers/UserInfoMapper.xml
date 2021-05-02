@@ -5,11 +5,13 @@
 
 <mapper namespace="com.hospital.xhu.demo.dao.IUserInfoMapper">
     <resultMap type="com.hospital.xhu.demo.entity.UserInfo" id="usermap">
-        <id column="username" property="username"/>
+        <id column="user_id" property="id"/>
+        <result column="username" property="username"/>
         <result column="user_pwd" property="password"/>
         <result column="user_pwd_salt" property="passwordSalt"/>
         <result column="user_email" property="email"/>
         <result column="user_phone" property="phone"/>
+        <result column="user_is_login" property="isLogin"/>
         <result column="user_last_login_time" property="lastLoginTime"/>
         <result column="user_image_uri" property="userImageUri"/>
     </resultMap>
@@ -28,7 +30,7 @@
 
     <!--查询满足条件的用户-->
     <select id="select" resultMap="usermap" parameterType="map">
-        SELECT username, user_pwd, user_pwd_salt, user_email, user_phone, user_last_login_time,
+        SELECT user_id, username, user_pwd, user_pwd_salt, user_email, user_phone, user_last_login_time,
         user_image_uri
         FROM user_info
         <where>
@@ -47,16 +49,28 @@
     </select>
 
     <!--添加用户的列表-->
-    <insert id="insert" parameterType="list">
+    <insert id="insert" parameterType="list" useGeneratedKeys="true" keyProperty="id">
         INSERT IGNORE INTO
-        user_info(username, user_pwd, user_pwd_salt, user_email,
-        user_phone, user_last_login_time, user_image_uri)
+        user_info(user_id, username, user_pwd, user_pwd_salt, user_email,
+        user_phone, user_is_login, user_last_login_time, user_image_uri)
         VALUES
-        <foreach collection="infos" open="(" close=")" separator="," item="item">
-            #{item.username}, #{item.password}, #{item.passwordSalt}, #{item.email},
+        <foreach collection="infos" open="(" close=")" separator="), (" item="item">
+            #{item.id}, #{item.username}, #{item.password}, #{item.passwordSalt}, #{item.email},
             #{item.phone}, #{item.isLogin}, #{item.lastLoginTime}, #{item.userImageUri}
         </foreach>
     </insert>
+
+    <!--查找符合条件的用户的数量-->
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT COUNT(user_id) FROM user_info
+        <where>
+            <if test="searchMap != null">
+                <foreach collection="searchMap.entrySet()" separator="and" index="key" item="value">
+                    ${key} = #{value}
+                </foreach>
+            </if>
+        </where>
+    </select>
 
     <!--更新满足的条件的用户的信息-->
     <update id="update" parameterType="map">

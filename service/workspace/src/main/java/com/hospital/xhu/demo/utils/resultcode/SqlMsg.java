@@ -11,7 +11,9 @@ public enum SqlMsg {
     // 测试
     REBUILD_KEY_ERROR("rebuild[%s]找不到对应的键 > %s"),
     REBUILD_SUCCESS("rebuild[%s] > before:%s after:%s"),
+    SELECT_COUNT_MISSING_REQUIRED_INFO("查询数据库[%s]的条件不能为空"),
     SELECT_SUCCESS("查询数据库[%s]成功 %s [%d,%d] ordered:%s %b > %s"),
+    SELECT_COUNT_SUCCESS("查询数据库[%s]成功 %s > %d"),
     SELECT_FAILED("数据库查询[%s]失败，请检查传入参数是否正确:%s"),
     SELECT_NOT_UNIQUE("数据库查询[%s]结果不唯一:%s"),
     INSERT_SUCCESS("插入数据库[%s]成功 %s > %d"),

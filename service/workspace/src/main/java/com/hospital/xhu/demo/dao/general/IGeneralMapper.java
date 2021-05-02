@@ -29,12 +29,19 @@ public interface IGeneralMapper<T> {
             @Param("isDesc") Boolean isDesc);
 
     /**
+     * 查找符合条件的医生的数量
+     * @param map 查询条件
+     * @return 符合条件的医生的数量
+     */
+    int selectCount(@Param("searchMap") Map<String, Object> map);
+
+    /**
      * 添加新的用户的方法
      *
      * @param userInfos 需要添加的用户的列表
      * @return 返回插入成功的数量
      */
-    int insert(@Param("info") List<T> userInfos);
+    int insert(@Param("infos") List<T> userInfos);
 
     /**
      * 根据传入的before查找符合的用户，再使用after中的数据进行更新

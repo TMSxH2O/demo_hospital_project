@@ -1,6 +1,6 @@
 package com.hospital.xhu.demo.service.impl;
 
-import com.hospital.xhu.demo.dao.impl.DepartmentInfoMapper;
+import com.hospital.xhu.demo.dao.impl.DepartmentInfoMapperImpl;
 import com.hospital.xhu.demo.entity.DepartmentInfo;
 import com.hospital.xhu.demo.exception.ProjectException;
 import com.hospital.xhu.demo.service.IDepartmentInfoService;
@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,9 +27,9 @@ import java.util.Map;
 public class DepartmentInfoServiceImpl implements IDepartmentInfoService {
 
     private static final String CLASS_INFO_NAME = "科室 department_info";
-    private final DepartmentInfoMapper departmentInfoMapper;
+    private final DepartmentInfoMapperImpl departmentInfoMapper;
 
-    public DepartmentInfoServiceImpl(@Qualifier("departmentInfoMapperImpl") DepartmentInfoMapper departmentInfoMapper) {
+    public DepartmentInfoServiceImpl(@Qualifier("departmentInfoMapperImpl") DepartmentInfoMapperImpl departmentInfoMapper) {
         this.departmentInfoMapper = departmentInfoMapper;
     }
 
@@ -121,10 +122,13 @@ public class DepartmentInfoServiceImpl implements IDepartmentInfoService {
             }
             int result = departmentInfoMapper.insert(departmentInfos);
             if (result == departmentInfos.size()) {
+                Map<String, Object> map = new HashMap<>(2);
+                map.put("count", result);
+                map.put("result", departmentInfos);
                 return new CommonResult<>(
                         CommonCode.SUCCESS.getCode(),
                         CommonServiceMsg.INSERT_SUCCESS.getMsg(CLASS_INFO_NAME),
-                        result);
+                        map);
             } else {
                 return new CommonResult<>(
                         ExceptionCode.DEPARTMENT_INFO.getCode(),

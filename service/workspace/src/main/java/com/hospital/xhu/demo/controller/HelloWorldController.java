@@ -1,5 +1,6 @@
 package com.hospital.xhu.demo.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -8,13 +9,13 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author TMS_H2O
  * @version V1.0
- * @date 2021/4/11
+ * @date 2021/5/2
  */
 @RestController
+@Slf4j
 public class HelloWorldController {
-
     @RequestMapping("hello_world")
-    public String testHelloWorld() {
+    public String helloWorld() {
         return "Hello World";
     }
 }

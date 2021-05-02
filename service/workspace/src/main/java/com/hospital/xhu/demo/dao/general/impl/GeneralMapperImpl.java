@@ -21,12 +21,10 @@ import java.util.Map;
  * @date 2021/4/30
  */
 @Slf4j
-abstract public class GeneralMapper<C extends Entity, T extends IGeneralMapper<C>> {
-    private static final String SQL_NAME = "";
-
+abstract public class GeneralMapperImpl<C extends Entity, T extends IGeneralMapper<C>> {
     protected final T mapper;
 
-    public GeneralMapper(T mapper) {
+    public GeneralMapperImpl(T mapper) {
         this.mapper = mapper;
     }
 
@@ -49,6 +47,13 @@ abstract public class GeneralMapper<C extends Entity, T extends IGeneralMapper<C
     protected abstract String getMapString(String key) throws ProjectException;
 
     /**
+     * 返回不同数据库表名
+     *
+     * @return getSqlName()
+     */
+    protected abstract String getSqlName();
+
+    /**
      * 通用查询数据的方法
      *
      * @param map        Optional 查找条件
@@ -64,7 +69,6 @@ abstract public class GeneralMapper<C extends Entity, T extends IGeneralMapper<C
             Integer page, Integer pageSize)
             throws ProjectException {
         // 存放转换后的Map
-        System.out.println(">>>" + map);
         Map<String, Object> newMap = rebuildMap(map);
         String tempOrderedKey = null;
         if (!StringUtils.isEmpty(orderedKey)) {
@@ -85,11 +89,39 @@ abstract public class GeneralMapper<C extends Entity, T extends IGeneralMapper<C
             // 分页查询
             PageHelper.startPage(page, pageSize);
             List<C> result = mapper.select(newMap, tempOrderedKey, isDesc);
-            log.debug(SqlMsg.SELECT_SUCCESS.getMsg(SQL_NAME, map, page, pageSize, orderedKey, isDesc, result));
+            log.debug(SqlMsg.SELECT_SUCCESS.getMsg(getSqlName(), map, page, pageSize, orderedKey, isDesc, result));
             return result;
         } catch (Exception e) {
             // 查询失败抛出项目通用异常
-            String msg = SqlMsg.SELECT_FAILED.getMsg(SQL_NAME, map);
+            String msg = SqlMsg.SELECT_FAILED.getMsg(getSqlName(), map);
+            log.warn(msg);
+            log.error(e.getMessage());
+            throw new ProjectException(ExceptionCode.SQL_EXCEPTION, msg);
+        }
+    }
+
+    /**
+     * 查询符合条件的数据
+     *
+     * @param map 查询条件
+     * @return 符合条件的数量
+     * @throws ProjectException 查询失败的异常
+     */
+    public int selectCount(Map<String, Object> map) throws ProjectException {
+        Map<String, Object> tempMap = rebuildMap(map);
+
+        if (CollectionUtils.isEmpty(tempMap)) {
+            String msg = SqlMsg.SELECT_COUNT_MISSING_REQUIRED_INFO.getMsg(getSqlName(), map);
+            log.warn(msg);
+            throw new ProjectException(ExceptionCode.SQL_EXCEPTION, msg);
+        }
+
+        try {
+            int result = mapper.selectCount(map);
+            log.debug(SqlMsg.SELECT_COUNT_SUCCESS.getMsg(getSqlName(), map, result));
+            return result;
+        } catch (Exception e) {
+            String msg = SqlMsg.SELECT_FAILED.getMsg(getSqlName(), map);
             log.warn(msg);
             log.error(e.getMessage());
             throw new ProjectException(ExceptionCode.SQL_EXCEPTION, msg);
@@ -106,12 +138,16 @@ abstract public class GeneralMapper<C extends Entity, T extends IGeneralMapper<C
         List<C> result = select(map, null, null, null, 1);
 
         if (result.size() > 1) {
-            String msg = SqlMsg.SELECT_NOT_UNIQUE.getMsg(SQL_NAME, map);
+            String msg = SqlMsg.SELECT_NOT_UNIQUE.getMsg(getSqlName(), map);
+            log.warn(msg);
+            throw new ProjectException(ExceptionCode.SQL_EXCEPTION, msg);
+        } else if (result.isEmpty()) {
+            String msg = SqlMsg.SELECT_FAILED.getMsg(getSqlName(), map);
             log.warn(msg);
             throw new ProjectException(ExceptionCode.SQL_EXCEPTION, msg);
         }
 
-        return result.isEmpty() ? null : result.get(0);
+        return result.get(0);
     }
 
     /**
@@ -124,10 +160,10 @@ abstract public class GeneralMapper<C extends Entity, T extends IGeneralMapper<C
     public int insert(List<C> list) throws ProjectException {
         try {
             int result = mapper.insert(list);
-            log.debug(SqlMsg.INSERT_SUCCESS.getMsg(SQL_NAME, list, result));
+            log.debug(SqlMsg.INSERT_SUCCESS.getMsg(getSqlName(), list, result));
             return result;
         } catch (Exception e) {
-            String msg = SqlMsg.INSERT_FAILED.getMsg(SQL_NAME, list);
+            String msg = SqlMsg.INSERT_FAILED.getMsg(getSqlName(), list);
             log.warn(msg);
             log.error(e.getMessage());
             throw new ProjectException(ExceptionCode.SQL_EXCEPTION, msg);
@@ -148,7 +184,7 @@ abstract public class GeneralMapper<C extends Entity, T extends IGeneralMapper<C
 
         // 防止一次性修改所有的医院科室信息，必须有一定的限制
         if (CollectionUtils.isEmpty(tempBeforeMap)) {
-            String msg = SqlMsg.UPDATE_MISSING_REQUIRED_INFO.getMsg(SQL_NAME, before);
+            String msg = SqlMsg.UPDATE_MISSING_REQUIRED_INFO.getMsg(getSqlName(), before);
             log.warn(msg);
             throw new ProjectException(
                     ExceptionCode.SQL_EXCEPTION,
@@ -157,10 +193,10 @@ abstract public class GeneralMapper<C extends Entity, T extends IGeneralMapper<C
 
         try {
             int result = mapper.update(tempBeforeMap, tempAfterMap);
-            log.debug(SqlMsg.UPDATE_SUCCESS.getMsg(SQL_NAME, before, after, result));
+            log.debug(SqlMsg.UPDATE_SUCCESS.getMsg(getSqlName(), before, after, result));
             return result;
         } catch (Exception e) {
-            String msg = SqlMsg.UPDATE_FAILED.getMsg(SQL_NAME, before, after);
+            String msg = SqlMsg.UPDATE_FAILED.getMsg(getSqlName(), before, after);
             log.warn(msg);
             log.error(e.getMessage());
             throw new ProjectException(ExceptionCode.SQL_EXCEPTION, msg);
@@ -178,17 +214,17 @@ abstract public class GeneralMapper<C extends Entity, T extends IGeneralMapper<C
         Map<String, Object> tempDeleteMap = rebuildMap(map);
 
         if (CollectionUtils.isEmpty(tempDeleteMap)) {
-            String msg = SqlMsg.DELETE_MISSING_REQUIRED_INFO.getMsg(SQL_NAME, map);
+            String msg = SqlMsg.DELETE_MISSING_REQUIRED_INFO.getMsg(getSqlName(), map);
             log.warn(msg);
             throw new ProjectException(ExceptionCode.SQL_EXCEPTION, msg);
         }
 
         try {
             int result = mapper.delete(tempDeleteMap);
-            log.debug(SqlMsg.DELETE_SUCCESS.getMsg(SQL_NAME, map, result));
+            log.debug(SqlMsg.DELETE_SUCCESS.getMsg(getSqlName(), map, result));
             return result;
         } catch (Exception e) {
-            String msg = SqlMsg.DELETE_FAILED.getMsg(SQL_NAME, map);
+            String msg = SqlMsg.DELETE_FAILED.getMsg(getSqlName(), map);
             log.warn(msg);
             log.error(e.getMessage());
             throw new ProjectException(ExceptionCode.SQL_EXCEPTION, msg);

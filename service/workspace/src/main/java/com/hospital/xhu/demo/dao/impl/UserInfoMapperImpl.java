@@ -2,10 +2,11 @@ package com.hospital.xhu.demo.dao.impl;
 
 import com.hospital.xhu.demo.dao.IUserInfoMapper;
 import com.hospital.xhu.demo.dao.general.IGeneralMapper;
-import com.hospital.xhu.demo.dao.general.impl.GeneralMapper;
+import com.hospital.xhu.demo.dao.general.impl.GeneralMapperImpl;
 import com.hospital.xhu.demo.entity.UserInfo;
 import com.hospital.xhu.demo.exception.ProjectException;
 import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
+import com.hospital.xhu.demo.utils.resultcode.SqlMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
@@ -23,7 +24,7 @@ import java.util.Map;
  */
 @Repository("userInfoMapperImpl")
 @Slf4j
-public class UserInfoMapper extends GeneralMapper<UserInfo, IGeneralMapper<UserInfo>> {
+public class UserInfoMapperImpl extends GeneralMapperImpl<UserInfo, IGeneralMapper<UserInfo>> {
     /**
      * 存放类属性到数据库字段的映射
      */
@@ -39,7 +40,7 @@ public class UserInfoMapper extends GeneralMapper<UserInfo, IGeneralMapper<UserI
         USER_INFO_PARAM_MAP.put("userImageUri", "user_image_uri");
     }
 
-    public UserInfoMapper(@Qualifier("userInfoMapper") IUserInfoMapper userInfoMapper) {
+    public UserInfoMapperImpl(@Qualifier("userInfoMapper") IUserInfoMapper userInfoMapper) {
         super(userInfoMapper);
     }
 
@@ -57,21 +58,39 @@ public class UserInfoMapper extends GeneralMapper<UserInfo, IGeneralMapper<UserI
                 result.put(USER_INFO_PARAM_MAP.get(key), map.get(key));
             }
             else {
-                throw new ProjectException(ExceptionCode.USER_INFO, "用户数据字段失败");
+                String msg = SqlMsg.REBUILD_KEY_ERROR.getMsg(getSqlName(), key);
+                log.warn(msg);
+                throw new ProjectException(ExceptionCode.USER_INFO, msg);
             }
         }
-        log.debug("数据转换 >> before:" + map + " after:" + result);
+        log.debug(SqlMsg.REBUILD_SUCCESS.getMsg(getSqlName(), map, result));
 
         return result;
     }
 
+    /**
+     * 转换某个字符串到数据库字段名
+     *
+     * @param key 转换前的字符串
+     * @return 转换后的字符串
+     * @throws ProjectException 转换失败的报错
+     */
     @Override
     protected String getMapString(String key) throws ProjectException {
         if (USER_INFO_PARAM_MAP.containsKey(key)) {
-            return USER_INFO_PARAM_MAP.get(key);
+            String result = USER_INFO_PARAM_MAP.get(key);
+            log.debug(SqlMsg.REBUILD_SUCCESS.getMsg(getSqlName(), key, result));
+            return result;
         }
         else {
-            throw new ProjectException(ExceptionCode.USER_INFO, "用户数据字段失败");
+            String msg = SqlMsg.REBUILD_KEY_ERROR.getMsg(getSqlName(), key);
+            log.warn(msg);
+            throw new ProjectException(ExceptionCode.USER_INFO, msg);
         }
+    }
+
+    @Override
+    protected String getSqlName() {
+        return "user_info";
     }
 }

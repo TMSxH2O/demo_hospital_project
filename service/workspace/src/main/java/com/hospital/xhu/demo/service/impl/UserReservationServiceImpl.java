@@ -1,6 +1,8 @@
 package com.hospital.xhu.demo.service.impl;
 
-import com.hospital.xhu.demo.dao.impl.UserReservationMapper;
+import com.hospital.xhu.demo.dao.impl.DoctorInfoMapperImpl;
+import com.hospital.xhu.demo.dao.impl.UserInfoMapperImpl;
+import com.hospital.xhu.demo.dao.impl.UserReservationMapperImpl;
 import com.hospital.xhu.demo.entity.UserReservation;
 import com.hospital.xhu.demo.exception.ProjectException;
 import com.hospital.xhu.demo.service.IUserReservationService;
@@ -8,10 +10,13 @@ import com.hospital.xhu.demo.utils.CommonResult;
 import com.hospital.xhu.demo.utils.resultcode.CommonCode;
 import com.hospital.xhu.demo.utils.resultcode.CommonServiceMsg;
 import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,11 +28,12 @@ import java.util.Map;
  * @date 2021/4/30
  */
 @Service
+@Slf4j
 public class UserReservationServiceImpl implements IUserReservationService {
     private static final String CLASS_INFO_NAME = "预约订单 user_hospital_reservation";
-    private final UserReservationMapper userReservationMapper;
+    private final UserReservationMapperImpl userReservationMapper;
 
-    public UserReservationServiceImpl(@Qualifier("userReservationMapperImpl") UserReservationMapper userReservationMapper) {
+    public UserReservationServiceImpl(@Qualifier("userReservationMapperImpl") UserReservationMapperImpl userReservationMapper) {
         this.userReservationMapper = userReservationMapper;
     }
 
@@ -51,7 +57,7 @@ public class UserReservationServiceImpl implements IUserReservationService {
             String orderedKey, Boolean isDesc) {
         try {
             List<UserReservation> result =
-                    userReservationMapper.selectUserReservation(map, orderedKey, isDesc, pageNum, pageSize);
+                    userReservationMapper.select(map, orderedKey, isDesc, pageNum, pageSize);
             String msg =
                     CommonServiceMsg.SELECT_SUCCESS.getMsg(CLASS_INFO_NAME, map, orderedKey, isDesc, pageNum, pageSize);
             return new CommonResult<>(CommonCode.SUCCESS.getCode(), msg, result);
@@ -80,7 +86,7 @@ public class UserReservationServiceImpl implements IUserReservationService {
         }
 
         try {
-            int size = userReservationMapper.updateUserReservation(selectKey, newValueMap);
+            int size = userReservationMapper.update(selectKey, newValueMap);
             if (size > 0) {
                 return new CommonResult<>(
                         CommonCode.SUCCESS.getCode(), CommonServiceMsg.UPDATE_SUCCESS.getMsg(CLASS_INFO_NAME), size);
@@ -118,12 +124,15 @@ public class UserReservationServiceImpl implements IUserReservationService {
             for (UserReservation userReservation : userReservations) {
                 userReservation.init();
             }
-            int result = userReservationMapper.insertUserReservation(userReservations);
+            int result = userReservationMapper.insert(userReservations);
             if (result == userReservations.size()) {
+                Map<String, Object> map = new HashMap<>(2);
+                map.put("count", result);
+                map.put("result", userReservations);
                 return new CommonResult<>(
                         CommonCode.SUCCESS.getCode(),
                         CommonServiceMsg.INSERT_SUCCESS.getMsg(CLASS_INFO_NAME),
-                        result);
+                        map);
             } else {
                 return new CommonResult<>(
                         ExceptionCode.USER_RESERVATION.getCode(),
@@ -153,7 +162,7 @@ public class UserReservationServiceImpl implements IUserReservationService {
         }
 
         try {
-            int result = userReservationMapper.deleteUserReservation(deleteKey);
+            int result = userReservationMapper.delete(deleteKey);
             if (result > 0) {
                 return new CommonResult<>(
                         CommonCode.SUCCESS.getCode(),
@@ -167,5 +176,28 @@ public class UserReservationServiceImpl implements IUserReservationService {
         } catch (ProjectException e) {
             return e.getResult();
         }
+    }
+
+    /**
+     * 用于获取用户信息的Mapper对象
+     *
+     * @param mapper 自动注入
+     * @return 自动注入的mapper对象
+     */
+    @Autowired
+    private UserInfoMapperImpl getUserInfoMapperImpl(@Qualifier("userInfoMapperImpl") UserInfoMapperImpl mapper) {
+        return mapper;
+    }
+
+    /**
+     * 用于获取医生信息的Mapper对象
+     *
+     * @param mapper 自动注入
+     * @return 自动注入的mapper对象
+     */
+    @Autowired
+    private DoctorInfoMapperImpl getDoctorInfoMapperImpl(
+            @Qualifier("doctorInfoMapperImpl") DoctorInfoMapperImpl mapper) {
+        return mapper;
     }
 }

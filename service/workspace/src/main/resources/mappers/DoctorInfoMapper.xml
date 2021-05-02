@@ -32,14 +32,26 @@
         </if>
     </select>
 
+    <!--查找符合条件的医生的数量-->
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT COUNT(doctor_id) FROM doctor_info
+        <where>
+            <if test="searchMap != null">
+                <foreach collection="searchMap.entrySet()" separator="and" index="key" item="value">
+                    ${key} = #{value}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
     <!--添加医生的列表-->
-    <insert id="insert" parameterType="list">
+    <insert id="insert" parameterType="list" useGeneratedKeys="true" keyProperty="doctor_id">
         INSERT IGNORE INTO
         doctor_info(doctor_id, department_id, doctor_name, reservation_price, remaining_capacity, doctor_image_uri)
         VALUES
-        <foreach collection="infos" open="(" close=")" separator="," item="item">
-            #{item.username}, #{item.password}, #{item.passwordSalt}, #{item.email},
-            #{item.phone}, #{item.isLogin}, #{item.lastLoginTime}, #{item.userImageUri}
+        <foreach collection="infos" open="(" close=")" separator="), (" item="item">
+            #{item.id}, #{item.departmentId}, #{item.doctorName}, #{item.reservationPrice},
+            #{item.remainingCapacity}, #{item.doctorImageUri}
         </foreach>
     </insert>
 

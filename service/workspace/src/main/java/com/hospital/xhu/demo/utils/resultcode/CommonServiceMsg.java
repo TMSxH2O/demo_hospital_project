@@ -10,6 +10,7 @@ package com.hospital.xhu.demo.utils.resultcode;
 public enum CommonServiceMsg {
     // 模板化各个返回msg输出
     SELECT_SUCCESS("查询[%s]成功 > {%s, %s, %b, %d, %d}"),
+    SELECT_FAILED("查询[%s]失败 > %s"),
     UPDATE_MISSING_REQUIRED_INFO("更新[%s]的索引值和修改值都不能为空"),
     UPDATE_SUCCESS("更新[%s]成功"),
     UPDATE_FAILED("更新[%s]失败 > {%s, %s}"),

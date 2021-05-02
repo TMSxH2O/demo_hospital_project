@@ -15,7 +15,7 @@
 
     <!--查询满足条件的预约订单-->
     <select id="select" resultMap="userReservation" parameterType="map">
-        SELECT reservation_id, user_id, doctor_id, reservation_data, reservation_price, reservation_status
+        SELECT reservation_id, user_id, doctor_id, reservation_date, reservation_price, reservation_status
         FROM user_hospital_reservation_info
         <where>
             <if test="searchMap != null">
@@ -32,15 +32,27 @@
         </if>
     </select>
 
+    <!--查找符合条件的医生的数量-->
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT COUNT(reservation_id) FROM user_hospital_reservation_info
+        <where>
+            <if test="searchMap != null">
+                <foreach collection="searchMap.entrySet()" separator="and" index="key" item="value">
+                    ${key} = #{value}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
     <!--添加预约订单的列表-->
     <insert id="insert" parameterType="list">
         INSERT IGNORE INTO
-        user_hospital_reservation_info(reservation_id, user_id, doctor_id, reservation_data,
+        user_hospital_reservation_info(reservation_id, user_id, doctor_id, reservation_date,
                                        reservation_price, reservation_status)
         VALUES
-        <foreach collection="infos" open="(" close=")" separator="," item="item">
-            #{item.username}, #{item.password}, #{item.passwordSalt}, #{item.email},
-            #{item.phone}, #{item.isLogin}, #{item.lastLoginTime}, #{item.userImageUri}
+        <foreach collection="infos" open="(" close=")" separator="), (" item="item">
+            #{item.id}, #{item.userId}, #{item.doctorId}, #{item.reservationDate},
+            #{item.reservationPrice}, #{item.reservationStatus}
         </foreach>
     </insert>
 

@@ -1,6 +1,6 @@
 package com.hospital.xhu.demo.utils.mgr.impl;
 
-import com.hospital.xhu.demo.dao.impl.UserInfoMapper;
+import com.hospital.xhu.demo.dao.impl.UserInfoMapperImpl;
 import com.hospital.xhu.demo.entity.UserInfo;
 import com.hospital.xhu.demo.exception.ProjectException;
 import com.hospital.xhu.demo.utils.EntityCache;
@@ -36,7 +36,7 @@ public class UserInfoCache implements IEntityCache<UserInfo> {
     @Value("${cache.limit_time")
     private static int lruLimitTime;
 //    @Resource(name = "UserInfoMapper")
-    private UserInfoMapper userInfoMapper;
+    private UserInfoMapperImpl userInfoMapper;
 
     static final private List<String> USERINFO_KEYS =
             Arrays.asList(
@@ -62,7 +62,7 @@ public class UserInfoCache implements IEntityCache<UserInfo> {
         List<UserInfo> result = searchObjectInCache(map);
         if (CollectionUtils.isEmpty(result)) {
             // 没有查询到数据，就需要查询数据库的接口
-            result = userInfoMapper.selectUserInfo(map, orderedKey, isDesc, pageNum, pageSize);
+            result = userInfoMapper.select(map, orderedKey, isDesc, pageNum, pageSize);
         }
         return null;
     }

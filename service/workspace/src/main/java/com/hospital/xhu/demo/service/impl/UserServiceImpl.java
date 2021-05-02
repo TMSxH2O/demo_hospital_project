@@ -1,11 +1,11 @@
 package com.hospital.xhu.demo.service.impl;
 
-import com.hospital.xhu.demo.dao.impl.UserInfoMapper;
+import com.hospital.xhu.demo.dao.impl.UserInfoMapperImpl;
 import com.hospital.xhu.demo.entity.UserInfo;
 import com.hospital.xhu.demo.exception.ProjectException;
 import com.hospital.xhu.demo.service.IUserService;
 import com.hospital.xhu.demo.utils.CommonResult;
-import com.hospital.xhu.demo.utils.UserInfoUtils;
+import com.hospital.xhu.demo.utils.helper.UserInfoHelper;
 import com.hospital.xhu.demo.utils.resultcode.CommonCode;
 import com.hospital.xhu.demo.utils.resultcode.CommonServiceMsg;
 import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
@@ -32,9 +32,9 @@ import java.util.Map;
 public class UserServiceImpl implements IUserService {
 
     private static final String CLASS_INFO_NAME = "用户 user_info";
-    private final UserInfoMapper userInfoMapper;
+    private final UserInfoMapperImpl userInfoMapper;
 
-    public UserServiceImpl(@Qualifier("userInfoMapperImpl") UserInfoMapper userInfoMapper) {
+    public UserServiceImpl(@Qualifier("userInfoMapperImpl") UserInfoMapperImpl userInfoMapper) {
         this.userInfoMapper = userInfoMapper;
     }
 
@@ -59,7 +59,7 @@ public class UserServiceImpl implements IUserService {
         }
 
         try {
-            Map<String, Object> usernameMap = UserInfoUtils.tempUsernameMap(username);
+            Map<String, Object> usernameMap = UserInfoHelper.tempUsernameMap(username);
             // 根据用户名查询用户信息
             UserInfo userInfo = userInfoMapper.selectPrimary(usernameMap);
             // 查询的结果为空
@@ -75,7 +75,7 @@ public class UserServiceImpl implements IUserService {
                 return new CommonResult<>(ExceptionCode.DATA_EXCEPTION.getCode(), "用户数据正常，请通知管理员处理");
             }
             // 合成用户输入密码加密后的结果
-            String tempUserPassword = UserInfoUtils.getMd5UserPassword(password, pwdSalt);
+            String tempUserPassword = UserInfoHelper.getMd5UserPassword(password, pwdSalt);
             // 密码一致
             if (StringUtils.isEmpty(tempUserPassword) && tempUserPassword.equals(userInfo.getPassword())) {
                 // 更新登录状态
@@ -112,7 +112,7 @@ public class UserServiceImpl implements IUserService {
 
         try {
             // 获取用户信息
-            UserInfo userInfo = userInfoMapper.selectPrimary(UserInfoUtils.tempUsernameMap(username));
+            UserInfo userInfo = userInfoMapper.selectPrimary(UserInfoHelper.tempUsernameMap(username));
             // 更新用户信息
             int result = updateLoginUserInfo(userInfo);
             if (result > 0) {
@@ -147,6 +147,11 @@ public class UserServiceImpl implements IUserService {
         userInfo.init();
 
         try {
+            // 获取密码的盐
+            String md5PassSalt = UserInfoHelper.getMd5PassSalt();
+            // 使用盐生成最终存储数据库的密码
+            String md5UserPassword = UserInfoHelper.getMd5UserPassword(userInfo.getPassword(), md5PassSalt);
+            userInfo.setPassword(md5UserPassword);
             // 尝试插入用户信息
             int result = userInfoMapper.insert(Collections.singletonList(userInfo));
             if (result > 0) {
@@ -169,6 +174,10 @@ public class UserServiceImpl implements IUserService {
      * @param pageNum    Optional 页码
      * @param pageSize   Optional 页大小
      * @return 符合要求的用户信息列表
+     * - 成功
+     * { code: 200, msg: 查询成功, data: List<userInfo> }
+     * - 失败
+     * { code: ExceptionCode, msg: 查询失败信息, data: null }
      */
     @Override
     public CommonResult<Object> selectUserInfo(
@@ -191,6 +200,10 @@ public class UserServiceImpl implements IUserService {
      * @param selectKey   查询用户需要更新的值
      * @param newValueMap 修改的值
      * @return 更新成功的数量
+     * - 成功
+     * { code: 200, msg: 更新成功, data: 更新成功的数量 }
+     * - 失败
+     * { code: ExceptionCode, msg: 更新失败信息, data: null }
      */
     @Override
     public CommonResult<Object> updateUserInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap) {
@@ -222,9 +235,9 @@ public class UserServiceImpl implements IUserService {
      * @param userInfos 用户数据列表
      * @return 插入结果
      * - 成功
-     * { code: 200, msg: 插入成功, data: 插入成功的数量 }
+     * { code: 200, msg: 添加成功, data: 添加成功的数量 }
      * - 失败
-     * { code: ExceptionCode, msg: 插入失败信息, data: null }
+     * { code: ExceptionCode, msg: 添加失败信息, data: null }
      */
     @Override
     public CommonResult<Object> insertUserInfo(List<UserInfo> userInfos) {
@@ -241,10 +254,13 @@ public class UserServiceImpl implements IUserService {
             }
             int result = userInfoMapper.insert(userInfos);
             if (result == userInfos.size()) {
+                Map<String, Object> map = new HashMap<>(2);
+                map.put("count", result);
+                map.put("result", userInfos);
                 return new CommonResult<>(
                         CommonCode.SUCCESS.getCode(),
                         CommonServiceMsg.INSERT_SUCCESS.getMsg(CLASS_INFO_NAME),
-                        result);
+                        map);
             } else {
                 return new CommonResult<>(
                         ExceptionCode.USER_INFO.getCode(),
@@ -300,10 +316,10 @@ public class UserServiceImpl implements IUserService {
         // 需要修改的Map
         Map<String, Object> tempUserInfo = new HashMap<>(2);
         // 如果已经登录变为没有登录，如果没有登录变为已经登录
-        UserInfoUtils.lastLoginTimeNowMap(tempUserInfo);
+        UserInfoHelper.lastLoginTimeNowMap(tempUserInfo);
 
         // 更新用户信息
-        return userInfoMapper.update(UserInfoUtils.tempUsernameMap(userInfo.getUsername()), tempUserInfo);
+        return userInfoMapper.update(UserInfoHelper.tempUsernameMap(userInfo.getUsername()), tempUserInfo);
     }
 }
 

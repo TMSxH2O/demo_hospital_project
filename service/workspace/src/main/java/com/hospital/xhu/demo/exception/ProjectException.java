@@ -3,6 +3,8 @@ package com.hospital.xhu.demo.exception;
 import com.hospital.xhu.demo.utils.CommonResult;
 import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
 
+import java.util.Arrays;
+
 /**
  * Created with IntelliJ IDEA.
  *
@@ -19,7 +21,20 @@ public class ProjectException extends Exception {
         this.msg = msg;
     }
 
+    public ExceptionCode getCode() {
+        return code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
     public CommonResult<Object> getResult() {
         return new CommonResult<>(code.getCode(), msg);
+    }
+
+    @Override
+    public String getMessage() {
+        return super.getMessage() + " >> " + Arrays.toString(super.getStackTrace());
     }
 }

@@ -29,14 +29,25 @@
         </if>
     </select>
 
+    <!--查找符合条件的科室的数量-->
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT COUNT(department_id) FROM department_info
+        <where>
+            <if test="searchMap != null">
+                <foreach collection="searchMap.entrySet()" separator="and" index="key" item="value">
+                    ${key} = #{value}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
     <!--添加科室的列表-->
-    <insert id="insert" parameterType="list">
+    <insert id="insert" parameterType="list" useGeneratedKeys="true" keyProperty="department_id">
         INSERT IGNORE INTO
         department_info(department_id, hospital_id, department_name)
         VALUES
-        <foreach collection="infos" open="(" close=")" separator="," item="item">
-            #{item.username}, #{item.password}, #{item.passwordSalt}, #{item.email},
-            #{item.phone}, #{item.isLogin}, #{item.lastLoginTime}, #{item.userImageUri}
+        <foreach collection="infos" open="(" close=")" separator="), (" item="item">
+            #{item.id}, #{item.hospitalId}, #{item.departmentName}
         </foreach>
     </insert>
 

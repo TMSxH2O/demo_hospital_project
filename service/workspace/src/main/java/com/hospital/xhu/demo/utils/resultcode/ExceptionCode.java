@@ -22,7 +22,8 @@ public enum ExceptionCode {
     DOCTOR_INFO(3004),
     // 用户预约订单相关错误
     USER_RESERVATION(3005),
-
+    // 预约操作相关操作
+    APPOINTMENT(4000),
     ;
 
 

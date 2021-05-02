@@ -28,11 +28,13 @@ public class UserInfo implements Entity {
      * lastLoginTime    用户最后登录时间（可能不需要）
      * userImageUri     用户头像图片路径（相对路径）
      */
+    private Long id;
     private String username;
     private String password;
     private String passwordSalt;
     private String email;
     private Long phone;
+    private Boolean isLogin;
     @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastLoginTime;
     private String userImageUri;

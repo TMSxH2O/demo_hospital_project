@@ -1,7 +1,6 @@
 package com.hospital.xhu.demo.entity;
 
 import com.hospital.xhu.demo.exception.ProjectException;
-import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +24,9 @@ public class DepartmentInfo implements Entity {
     @Override
     public void init() throws ProjectException {
         if (null == hospitalId) {
-            throw new ProjectException(ExceptionCode.DEPARTMENT_INFO, "科室对应的医院id不能为空");
+            // throw new ProjectException(ExceptionCode.DEPARTMENT_INFO, "科室对应的医院id不能为空");
+            // 目前只针对一个医院，因此医院编号默认为0
+            hospitalId = 0L;
         }
         if (null == departmentName) {
             departmentName = "";

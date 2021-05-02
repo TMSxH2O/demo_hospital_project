@@ -1,6 +1,6 @@
 package com.hospital.xhu.demo.service.impl;
 
-import com.hospital.xhu.demo.dao.impl.HospitalInfoMapper;
+import com.hospital.xhu.demo.dao.impl.HospitalInfoMapperImpl;
 import com.hospital.xhu.demo.entity.HospitalInfo;
 import com.hospital.xhu.demo.exception.ProjectException;
 import com.hospital.xhu.demo.service.IHospitalInfoService;
@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,9 +29,9 @@ import java.util.Map;
 public class HospitalInfoServiceImpl implements IHospitalInfoService {
 
     private static final String CLASS_INFO_NAME = "医院 hospital_info";
-    private final HospitalInfoMapper hospitalInfoMapper;
+    private final HospitalInfoMapperImpl hospitalInfoMapper;
 
-    public HospitalInfoServiceImpl(@Qualifier("hospitalInfoMapperImpl") HospitalInfoMapper hospitalInfoMapper) {
+    public HospitalInfoServiceImpl(@Qualifier("hospitalInfoMapperImpl") HospitalInfoMapperImpl hospitalInfoMapper) {
         this.hospitalInfoMapper = hospitalInfoMapper;
     }
 
@@ -54,7 +55,7 @@ public class HospitalInfoServiceImpl implements IHospitalInfoService {
             Integer pageSize, String orderedKey, Boolean isDesc) {
         try {
             List<HospitalInfo> result =
-                    hospitalInfoMapper.selectHospitalInfo(map, orderedKey, isDesc, pageNum, pageSize);
+                    hospitalInfoMapper.select(map, orderedKey, isDesc, pageNum, pageSize);
             String msg =
                     CommonServiceMsg.SELECT_SUCCESS.getMsg(CLASS_INFO_NAME, map, orderedKey, isDesc, pageNum, pageSize);
             return new CommonResult<>(CommonCode.SUCCESS.getCode(), msg, result);
@@ -83,7 +84,7 @@ public class HospitalInfoServiceImpl implements IHospitalInfoService {
         }
 
         try {
-            int size = hospitalInfoMapper.updateHospitalInfo(selectKey, newValueMap);
+            int size = hospitalInfoMapper.update(selectKey, newValueMap);
             if (size > 0) {
                 return new CommonResult<>(
                         CommonCode.SUCCESS.getCode(), CommonServiceMsg.UPDATE_SUCCESS.getMsg(CLASS_INFO_NAME), size);
@@ -121,12 +122,15 @@ public class HospitalInfoServiceImpl implements IHospitalInfoService {
             for (HospitalInfo hospitalInfo : hospitalInfos) {
                 hospitalInfo.init();
             }
-            int result = hospitalInfoMapper.insertHospitalInfo(hospitalInfos);
+            int result = hospitalInfoMapper.insert(hospitalInfos);
             if (result == hospitalInfos.size()) {
+                Map<String, Object> map = new HashMap<>(2);
+                map.put("count", result);
+                map.put("result", hospitalInfos);
                 return new CommonResult<>(
                         CommonCode.SUCCESS.getCode(),
                         CommonServiceMsg.INSERT_SUCCESS.getMsg(CLASS_INFO_NAME),
-                        result);
+                        map);
             } else {
                 return new CommonResult<>(
                         ExceptionCode.HOSPITAL_INFO.getCode(),
@@ -156,7 +160,7 @@ public class HospitalInfoServiceImpl implements IHospitalInfoService {
         }
 
         try {
-            int result = hospitalInfoMapper.deleteHospitalInfo(deleteKey);
+            int result = hospitalInfoMapper.delete(deleteKey);
             if (result > 0) {
                 return new CommonResult<>(
                         CommonCode.SUCCESS.getCode(),

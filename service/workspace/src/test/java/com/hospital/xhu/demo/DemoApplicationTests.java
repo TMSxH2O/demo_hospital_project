@@ -1,19 +1,24 @@
 package com.hospital.xhu.demo;
 
-import com.hospital.xhu.demo.dao.impl.DepartmentInfoMapper;
+import com.hospital.xhu.demo.dao.IUserInfoMapper;
+import com.hospital.xhu.demo.dao.impl.DepartmentInfoMapperImpl;
+import com.hospital.xhu.demo.entity.UserInfo;
 import com.hospital.xhu.demo.exception.ProjectException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.annotation.Resource;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 @SpringBootTest
 class DemoApplicationTests {
 
-//    @Resource
-//    public IUserInfoMapper userInfoMapper;
+    @Resource
+    public IUserInfoMapper userInfoMapper;
 //
 //    @Test
 //    void testUserInfoSelect() {
@@ -25,11 +30,11 @@ class DemoApplicationTests {
 //        System.out.println(userInfoMapper.select(null, "username", null));
 //    }
 //
-//    @Test
-//    void testUserInfoInsert() {
-//        UserInfo userInfo = new UserInfo("test2", "123", "123", "", 0L, LocalDateTime.now(), "");
-//        System.out.println(userInfoMapper.insert(Collections.singletonList(userInfo)));
-//    }
+    @Test
+    void testUserInfoInsert() {
+        UserInfo userInfo = new UserInfo(null, "test", "123", null, null, null, null, LocalDateTime.now(), "");
+        System.out.println(userInfoMapper.insert(Collections.singletonList(userInfo)));
+    }
 //
 //    @Test
 //    void testUserInfoUpdate() {
@@ -49,7 +54,7 @@ class DemoApplicationTests {
 //    }
 //
     @Autowired
-    DepartmentInfoMapper departmentInfoMapper;
+DepartmentInfoMapperImpl departmentInfoMapper;
 
     @Test
     void testDepartmentMapper() {

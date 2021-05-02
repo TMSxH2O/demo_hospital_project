@@ -1,7 +1,10 @@
 package com.hospital.xhu.demo.utils;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.ToString;
+
+import java.io.Serializable;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,8 +15,9 @@ import lombok.ToString;
  * @date 2021/4/11
  */
 @AllArgsConstructor
+@Getter
 @ToString
-public class CommonResult<T> {
+public class CommonResult<T> implements Serializable {
     private final int code;
     private final String msg;
     private final T data;

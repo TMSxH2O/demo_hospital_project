@@ -1,10 +1,11 @@
 package com.hospital.xhu.demo.service.impl;
 
-import com.hospital.xhu.demo.dao.impl.DoctorInfoMapper;
+import com.hospital.xhu.demo.dao.impl.DoctorInfoMapperImpl;
 import com.hospital.xhu.demo.entity.DoctorInfo;
 import com.hospital.xhu.demo.exception.ProjectException;
 import com.hospital.xhu.demo.service.IDoctorInfoService;
 import com.hospital.xhu.demo.utils.CommonResult;
+import com.hospital.xhu.demo.utils.helper.DoctorInfoHelper;
 import com.hospital.xhu.demo.utils.resultcode.CommonCode;
 import com.hospital.xhu.demo.utils.resultcode.CommonServiceMsg;
 import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,10 +27,10 @@ import java.util.Map;
 @Service
 public class DoctorInfoServiceImpl implements IDoctorInfoService {
 
-    private final DoctorInfoMapper doctorInfoMapper;
     private static final String CLASS_INFO_NAME = "医生 doctor_info";
+    private final DoctorInfoMapperImpl doctorInfoMapper;
 
-    public DoctorInfoServiceImpl(@Qualifier("doctorInfoMapperImpl") DoctorInfoMapper doctorInfoMapper) {
+    public DoctorInfoServiceImpl(@Qualifier("doctorInfoMapperImpl") DoctorInfoMapperImpl doctorInfoMapper) {
         this.doctorInfoMapper = doctorInfoMapper;
     }
 
@@ -52,13 +54,35 @@ public class DoctorInfoServiceImpl implements IDoctorInfoService {
             String orderedKey, Boolean isDesc) {
         try {
             List<DoctorInfo> result =
-                    doctorInfoMapper.selectDoctorInfo(map, orderedKey, isDesc, pageNum, pageSize);
+                    doctorInfoMapper.select(map, orderedKey, isDesc, pageNum, pageSize);
             String msg =
                     CommonServiceMsg.SELECT_SUCCESS.getMsg(CLASS_INFO_NAME, map, orderedKey, isDesc, pageNum, pageSize);
             return new CommonResult<>(CommonCode.SUCCESS.getCode(), msg, result);
         } catch (ProjectException e) {
             return e.getResult();
         }
+    }
+
+    /**
+     * 查询指定科室下的医生列表
+     *
+     * @param departmentId Optional 查询条件
+     * @param pageNum      Optional 页码
+     * @param pageSize     Optional 页大小
+     * @param orderedKey   Optional 排序的字段
+     * @param isDesc       Optional 是否反向
+     * @return 符合条件的医生信息列表
+     * - 成功
+     * { code: 200, msg: 查询成功, data: 医院科室信息列表 }
+     * - 失败
+     * { code: ExceptionCode, msg: 查询失败信息, data: null }
+     */
+    @Override
+    public CommonResult<Object> selectDepartmentDoctors(
+            Long departmentId, Integer pageNum, Integer pageSize,
+            String orderedKey, Boolean isDesc) {
+        Map<String, Object> tempDepartmentIdMap = DoctorInfoHelper.tempDepartmentIdMap(departmentId);
+        return selectDoctorInfo(tempDepartmentIdMap, pageNum, pageSize, orderedKey, isDesc);
     }
 
     /**
@@ -81,7 +105,7 @@ public class DoctorInfoServiceImpl implements IDoctorInfoService {
         }
 
         try {
-            int size = doctorInfoMapper.updateDoctorInfo(selectKey, newValueMap);
+            int size = doctorInfoMapper.update(selectKey, newValueMap);
             if (size > 0) {
                 return new CommonResult<>(
                         CommonCode.SUCCESS.getCode(), CommonServiceMsg.UPDATE_SUCCESS.getMsg(CLASS_INFO_NAME), size);
@@ -119,12 +143,15 @@ public class DoctorInfoServiceImpl implements IDoctorInfoService {
             for (DoctorInfo doctorInfo : doctorInfos) {
                 doctorInfo.init();
             }
-            int result = doctorInfoMapper.insertDoctorInfo(doctorInfos);
+            int result = doctorInfoMapper.insert(doctorInfos);
             if (result == doctorInfos.size()) {
+                Map<String, Object> map = new HashMap<>(2);
+                map.put("count", result);
+                map.put("result", doctorInfos);
                 return new CommonResult<>(
                         CommonCode.SUCCESS.getCode(),
                         CommonServiceMsg.INSERT_SUCCESS.getMsg(CLASS_INFO_NAME),
-                        result);
+                        map);
             } else {
                 return new CommonResult<>(
                         ExceptionCode.DOCTOR_INFO.getCode(),
@@ -154,7 +181,7 @@ public class DoctorInfoServiceImpl implements IDoctorInfoService {
         }
 
         try {
-            int result = doctorInfoMapper.deleteDoctorInfo(deleteKey);
+            int result = doctorInfoMapper.delete(deleteKey);
             if (result > 0) {
                 return new CommonResult<>(
                         CommonCode.SUCCESS.getCode(),
