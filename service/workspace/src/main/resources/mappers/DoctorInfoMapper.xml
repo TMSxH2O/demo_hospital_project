@@ -45,7 +45,7 @@
     </select>
 
     <!--添加医生的列表-->
-    <insert id="insert" parameterType="list" useGeneratedKeys="true" keyProperty="doctor_id">
+    <insert id="insert" parameterType="list" useGeneratedKeys="true" keyProperty="id">
         INSERT IGNORE INTO
         doctor_info(doctor_id, department_id, doctor_name, reservation_price, remaining_capacity, doctor_image_uri)
         VALUES

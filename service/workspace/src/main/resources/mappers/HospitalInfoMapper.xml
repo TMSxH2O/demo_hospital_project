@@ -43,7 +43,7 @@
     </select>
 
     <!--添加医院的列表-->
-    <insert id="insert" parameterType="list" useGeneratedKeys="true" keyProperty="hospital_id">
+    <insert id="insert" parameterType="list" useGeneratedKeys="true" keyProperty="id">
         INSERT IGNORE INTO
         hospital_info(hospital_id, hospital_name, hospital_address, hospital_phone)
         VALUES

@@ -20,7 +20,7 @@ public interface IAppointmentService {
      * @param reservationDate 预约时间
      * @return 预约结果
      */
-    CommonResult<Object> reservation(Long userId, Long doctorId, LocalDate reservationDate);
+    CommonResult<?> reservation(Long userId, Long doctorId, LocalDate reservationDate);
 
     /**
      * 查询医生在指定日期的剩余容量
@@ -29,5 +29,5 @@ public interface IAppointmentService {
      * @param date     指定日期
      * @return 查询结果
      */
-    CommonResult<Object> selectDoctorReservationAvailableCapacity(Long doctorId, LocalDate date);
+    CommonResult<?> selectDoctorReservationAvailableCapacity(Long doctorId, LocalDate date);
 }

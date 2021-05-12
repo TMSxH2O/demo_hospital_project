@@ -4,12 +4,13 @@ import com.github.pagehelper.PageHelper;
 import com.hospital.xhu.demo.dao.general.IGeneralMapper;
 import com.hospital.xhu.demo.entity.Entity;
 import com.hospital.xhu.demo.exception.ProjectException;
-import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
-import com.hospital.xhu.demo.utils.resultcode.SqlMsg;
+import com.hospital.xhu.demo.utils.enumerate.ExceptionCode;
+import com.hospital.xhu.demo.utils.enumerate.SqlMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,12 +22,34 @@ import java.util.Map;
  * @date 2021/4/30
  */
 @Slf4j
-abstract public class GeneralMapperImpl<C extends Entity, T extends IGeneralMapper<C>> {
-    protected final T mapper;
+abstract public class GeneralMapperImpl<T extends Entity> {
 
-    public GeneralMapperImpl(T mapper) {
+    private final IGeneralMapper<T> mapper;
+
+    public GeneralMapperImpl(IGeneralMapper<T> mapper) {
         this.mapper = mapper;
     }
+
+    /**
+     * 返回不同数据库表名
+     *
+     * @return getSqlName()
+     */
+    protected abstract String getSqlName();
+
+    /**
+     * 获取字段转换的的Map
+     *
+     * @return 获取字段转换的Map
+     */
+    protected abstract Map<String, String> getMap();
+
+    /**
+     * 获取当前Mapper对应的错误码
+     *
+     * @return 错误码
+     */
+    protected abstract ExceptionCode getExceptionCode();
 
     /**
      * 将Map中的key从类属性转换为数据库字段名
@@ -35,7 +58,26 @@ abstract public class GeneralMapperImpl<C extends Entity, T extends IGeneralMapp
      * @return 转换后的Map
      * @throws ProjectException 转换失败的信息
      */
-    protected abstract Map<String, Object> rebuildMap(Map<String, Object> map) throws ProjectException;
+    protected Map<String, Object> rebuildMap(Map<String, Object> map) throws ProjectException {
+        Map<String, Object> result = new HashMap<>(map.size());
+        Map<String, String> tempRebuildMap = getMap();
+        for (String key : map.keySet()) {
+            if (tempRebuildMap.containsKey(key)) {
+                // 需要同时保证值不为空
+                if (null != map.get(key)) {
+                    result.put(tempRebuildMap.get(key), map.get(key));
+                }
+            }
+            else {
+                String msg = SqlMsg.REBUILD_KEY_ERROR.getMsg(getSqlName(), key);
+                log.warn(msg);
+                throw new ProjectException(getExceptionCode(), msg);
+            }
+        }
+        log.debug(SqlMsg.REBUILD_SUCCESS.getMsg(getSqlName(), map, result));
+
+        return result;
+    }
 
     /**
      * 将key从类属性转换为数据库字段名
@@ -44,14 +86,19 @@ abstract public class GeneralMapperImpl<C extends Entity, T extends IGeneralMapp
      * @return 转换后的字符串
      * @throws ProjectException 转化失败
      */
-    protected abstract String getMapString(String key) throws ProjectException;
-
-    /**
-     * 返回不同数据库表名
-     *
-     * @return getSqlName()
-     */
-    protected abstract String getSqlName();
+    protected String getMapString(String key) throws ProjectException {
+        Map<String, String> tempRebuildMap = getMap();
+        if (tempRebuildMap.containsKey(key)) {
+            String result = tempRebuildMap.get(key);
+            log.debug(SqlMsg.REBUILD_SUCCESS.getMsg(getSqlName(), key, result));
+            return result;
+        }
+        else {
+            String msg = SqlMsg.REBUILD_KEY_ERROR.getMsg(getSqlName(), key);
+            log.warn(msg);
+            throw new ProjectException(getExceptionCode(), msg);
+        }
+    }
 
     /**
      * 通用查询数据的方法
@@ -64,7 +111,7 @@ abstract public class GeneralMapperImpl<C extends Entity, T extends IGeneralMapp
      * @return 符合条件的医院科室信息列表
      * @throws ProjectException 查询失败信息
      */
-    public List<C> select(
+    public List<T> select(
             Map<String, Object> map, String orderedKey, Boolean isDesc,
             Integer page, Integer pageSize)
             throws ProjectException {
@@ -76,8 +123,8 @@ abstract public class GeneralMapperImpl<C extends Entity, T extends IGeneralMapp
             tempOrderedKey = getMapString(orderedKey);
         }
         // 默认从第一页开始
-        if (null == page) {
-            page = 0;
+        if (null == page || page < 1) {
+            page = 1;
         }
 
         // 默认每页10条数据
@@ -88,7 +135,7 @@ abstract public class GeneralMapperImpl<C extends Entity, T extends IGeneralMapp
         try {
             // 分页查询
             PageHelper.startPage(page, pageSize);
-            List<C> result = mapper.select(newMap, tempOrderedKey, isDesc);
+            List<T> result = mapper.select(newMap, tempOrderedKey, isDesc);
             log.debug(SqlMsg.SELECT_SUCCESS.getMsg(getSqlName(), map, page, pageSize, orderedKey, isDesc, result));
             return result;
         } catch (Exception e) {
@@ -117,7 +164,7 @@ abstract public class GeneralMapperImpl<C extends Entity, T extends IGeneralMapp
         }
 
         try {
-            int result = mapper.selectCount(map);
+            int result = mapper.selectCount(tempMap);
             log.debug(SqlMsg.SELECT_COUNT_SUCCESS.getMsg(getSqlName(), map, result));
             return result;
         } catch (Exception e) {
@@ -134,15 +181,16 @@ abstract public class GeneralMapperImpl<C extends Entity, T extends IGeneralMapp
      * @param map 查询条件
      * @return 唯一结果
      */
-    public C selectPrimary(Map<String, Object> map) throws ProjectException {
-        List<C> result = select(map, null, null, null, 1);
+    public T selectPrimary(Map<String, Object> map) throws ProjectException {
+        List<T> result = select(map, null, null, null, 1);
 
-        if (result.size() > 1) {
-            String msg = SqlMsg.SELECT_NOT_UNIQUE.getMsg(getSqlName(), map);
-            log.warn(msg);
-            throw new ProjectException(ExceptionCode.SQL_EXCEPTION, msg);
-        } else if (result.isEmpty()) {
+        if (CollectionUtils.isEmpty(result)) {
             String msg = SqlMsg.SELECT_FAILED.getMsg(getSqlName(), map);
+            log.warn("查询结果[{}] > {}", result, msg);
+            throw new ProjectException(ExceptionCode.SQL_EXCEPTION, msg);
+        }
+        else if (result.size() > 1) {
+            String msg = SqlMsg.SELECT_NOT_UNIQUE.getMsg(getSqlName(), map);
             log.warn(msg);
             throw new ProjectException(ExceptionCode.SQL_EXCEPTION, msg);
         }
@@ -157,7 +205,7 @@ abstract public class GeneralMapperImpl<C extends Entity, T extends IGeneralMapp
      * @return 插入成功的数量
      * @throws ProjectException 插入失败的异常
      */
-    public int insert(List<C> list) throws ProjectException {
+    public int insert(List<T> list) throws ProjectException {
         try {
             int result = mapper.insert(list);
             log.debug(SqlMsg.INSERT_SUCCESS.getMsg(getSqlName(), list, result));

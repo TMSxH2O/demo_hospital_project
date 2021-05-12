@@ -32,8 +32,8 @@ class DemoApplicationTests {
 //
     @Test
     void testUserInfoInsert() {
-        UserInfo userInfo = new UserInfo(null, "test", "123", null, null, null, null, LocalDateTime.now(), "");
-        System.out.println(userInfoMapper.insert(Collections.singletonList(userInfo)));
+//        UserInfo userInfo = new UserInfo(null, "test", "123", null, null, null, null, LocalDateTime.now(), "");
+//        System.out.println(userInfoMapper.insert(Collections.singletonList(userInfo)));
     }
 //
 //    @Test

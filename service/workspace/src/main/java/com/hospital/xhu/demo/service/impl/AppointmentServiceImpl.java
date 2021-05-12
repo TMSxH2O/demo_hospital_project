@@ -11,8 +11,8 @@ import com.hospital.xhu.demo.utils.CommonResult;
 import com.hospital.xhu.demo.utils.helper.DoctorInfoHelper;
 import com.hospital.xhu.demo.utils.helper.UserInfoHelper;
 import com.hospital.xhu.demo.utils.helper.UserReservationHelper;
-import com.hospital.xhu.demo.utils.resultcode.CommonCode;
-import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
+import com.hospital.xhu.demo.utils.enumerate.CommonCode;
+import com.hospital.xhu.demo.utils.enumerate.ExceptionCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +51,7 @@ public class AppointmentServiceImpl implements IAppointmentService {
      * { code: ExceptionCode, msg: 预约失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> reservation(
+    public CommonResult<?> reservation(
             Long userId, Long doctorId, LocalDate reservationDate) {
         if (null == userId || null == doctorId || null == reservationDate) {
             String temp = "预约订单失败，缺少必要的参数，请检查参数是否正确: %d %d %s";
@@ -92,7 +92,7 @@ public class AppointmentServiceImpl implements IAppointmentService {
 
                 String msg = "预约订单成功 > " + tempUserReservation;
                 log.debug(msg);
-                return new CommonResult<>(CommonCode.SUCCESS.getCode(), msg);
+                return new CommonResult<>(CommonCode.SUCCESS.getCode(), msg, reservationId);
             }
         } catch (ProjectException e) {
             return e.getResult();
@@ -111,7 +111,7 @@ public class AppointmentServiceImpl implements IAppointmentService {
      * { code: ExceptionCode, msg: 查询失败信息, date: null }
      */
     @Override
-    public CommonResult<Object> selectDoctorReservationAvailableCapacity(Long doctorId, LocalDate date) {
+    public CommonResult<?> selectDoctorReservationAvailableCapacity(Long doctorId, LocalDate date) {
         if (null == doctorId || null == date) {
             String temp = "查询剩余容量失败，缺少必要的参数，请检查参数是否正确: %d %s";
             String msg = String.format(temp, doctorId, date);
@@ -139,7 +139,7 @@ public class AppointmentServiceImpl implements IAppointmentService {
             String temp = "查询剩余容量成功，%d医生在%s还剩余 > %d";
             String msg = String.format(temp, doctorId, date, remaining);
             log.debug(msg);
-            return new CommonResult<>(CommonCode.SUCCESS.getCode(), msg);
+            return new CommonResult<>(CommonCode.SUCCESS.getCode(), msg, remaining);
         } catch (ProjectException e) {
             return e.getResult();
         }

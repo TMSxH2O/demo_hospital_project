@@ -1,10 +1,12 @@
 package com.hospital.xhu.demo.entity;
 
 import com.hospital.xhu.demo.exception.ProjectException;
-import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
+import com.hospital.xhu.demo.utils.enumerate.ExceptionCode;
+import com.hospital.xhu.demo.utils.payment.ReservationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -24,18 +26,28 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Slf4j
 public class UserReservation implements Entity {
-    private String id;
-    private Long userId;
-    private Long doctorId;
-    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    private LocalDate reservationDate;
-    private Float reservationPrice;
-    private Integer reservationStatus;
+    protected String id;
+    protected Long userId;
+    protected Long doctorId;
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    protected LocalDate reservationDate;
+    protected Float reservationPrice;
+    protected Integer reservationStatus;
+
+    public Integer getReservationStatus() {
+        return reservationStatus;
+    }
+
+    public void setReservationStatus(Integer reservationStatus) throws ProjectException {
+        this.reservationStatus = ReservationStatus.getInstance(reservationStatus).get();
+    }
 
     @Override
     public void init() throws ProjectException {
         if (null == userId) {
+
             throw new ProjectException(ExceptionCode.USER_RESERVATION, "预约订单对应的用户id不能为空");
         }
         if (null == doctorId) {
@@ -50,7 +62,7 @@ public class UserReservation implements Entity {
         }
         if (null == reservationStatus) {
             // 默认设置状态为未支付
-            reservationStatus = 0;
+            setReservationStatus(0);
         }
     }
 }

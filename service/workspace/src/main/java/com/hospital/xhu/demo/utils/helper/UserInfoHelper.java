@@ -1,11 +1,16 @@
 package com.hospital.xhu.demo.utils.helper;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.hospital.xhu.demo.entity.UserInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.security.MD5Encoder;
+import org.springframework.util.DigestUtils;
 
+import java.sql.Date;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -27,7 +32,7 @@ public class UserInfoHelper {
      * @return 用户id的Map
      */
     public static Map<String, Object> tempUserIdMap(long userId) {
-        return Collections.singletonMap("userId", userId);
+        return Collections.singletonMap("id", userId);
     }
 
     /**
@@ -41,30 +46,46 @@ public class UserInfoHelper {
     }
 
     /**
+     * 得到用户手机号的Map
+     *
+     * @param phone 手机号
+     * @return 手机号的Map
+     */
+    public static Map<String, Object> tempUserPhoneMap(Long phone) {
+        return Collections.singletonMap("phone", phone);
+    }
+
+    /**
      * 返回上次更新时间为现在的 Map
      *
-     * @return { "lastLoginTime", now() }
+     * @return 最新的登陆时间
      */
-    public static Map<String, Object> lastLoginTimeNowMap(Map<String, Object> map) {
-        if (null == map) {
-            map = new HashMap<>(1);
-        }
-        map.put("lastLoginTime", LocalDateTime.now().toString());
-        return map;
+    public static LocalDateTime lastLoginTimeNowMap(Map<String, Object> map) {
+        LocalDateTime result = LocalDateTime.now();
+        map.put("lastLoginTime", result);
+        return result;
     }
 
     /**
      * 返回登录状态的 Map
      *
      * @param isLogin 登录状态
-     * @return { "isLogin", "0"/"1" }
+     * @return 切换后的登陆状态
      */
-    public static Map<String, Object> userIsLoginMap(Map<String, Object> map, boolean isLogin) {
-        if (null == map) {
-            map = new HashMap<>(1);
-        }
-        map.put("isLogin", isLogin ? "0" : "1");
-        return map;
+    public static Boolean userIsLoginMap(Map<String, Object> map, boolean isLogin) {
+        map.put("isLogin", isLogin);
+        return isLogin;
+    }
+
+    /**
+     * 创建用户登录的Sign
+     *
+     * @param map 登录的签名
+     */
+    public static String userLoginSignMap(Map<String, Object> map) {
+        String result = getLoginSign();
+        map.put("userLoginSign", result);
+        return result;
     }
 
     /**
@@ -75,8 +96,8 @@ public class UserInfoHelper {
      * @return 最终的密码
      */
     public static String getMd5UserPassword(String password, String pwdSalt) {
-        String newWord = password + pwdSalt;
-        String result = MD5Encoder.encode(newWord.getBytes());
+        String temp = password + pwdSalt;
+        String result = DigestUtils.md5DigestAsHex(temp.getBytes());
         log.debug("[用户密码解析] md5加密 password:{} pwdSalt:{} >> result:{}", password, pwdSalt, result);
         return result;
     }
@@ -89,8 +110,42 @@ public class UserInfoHelper {
      */
     public static String getMd5PassSalt() {
         // 使用uuid生成随机值，再进行MD5加密
-        String result = MD5Encoder.encode(UUID.randomUUID().toString().getBytes());
+        String result = DigestUtils.md5DigestAsHex(UUID.randomUUID().toString().getBytes());
         log.debug("[用户密码盐生成] 生成密码盐 > {}", result);
         return result;
+    }
+
+    /**
+     * 生成用户登录的签名
+     *
+     * @return 签名
+     */
+    public static String getLoginSign() {
+        String result = UUID.randomUUID().toString();
+        log.debug("[用户签名] 用户登录签名 > {}", result);
+        return result;
+    }
+
+    /**
+     * 生成用户登录的Token
+     *
+     * @param userInfo 用户信息
+     * @return 生成的Token
+     */
+    public static String getToken(UserInfo userInfo, String sign) {
+        // Token的有效时间范围
+        ZoneId zoneId = ZoneId.systemDefault();
+        // 使用的是最近的登陆时间进行计算
+        ZonedDateTime zonedDateTime = userInfo.getLastLoginTime().atZone(zoneId);
+        java.util.Date start = Date.from(zonedDateTime.toInstant());
+        // 一个小时的有效时间
+        long endTime = start.getTime() + 60 * 60 * 1000;
+        // 过期时间
+        Date end = new Date(endTime);
+
+        log.debug("生成log > [{}, {}] sign: {}", start, end, userInfo.getUserLoginSign());
+        // 生成Token
+        return JWT.create().withAudience(String.valueOf(userInfo.getId()), userInfo.getUsername())
+                .withIssuedAt(start).withExpiresAt(end).sign(Algorithm.HMAC256(sign));
     }
 }

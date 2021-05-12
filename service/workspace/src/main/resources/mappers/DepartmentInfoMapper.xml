@@ -42,7 +42,7 @@
     </select>
 
     <!--添加科室的列表-->
-    <insert id="insert" parameterType="list" useGeneratedKeys="true" keyProperty="department_id">
+    <insert id="insert" parameterType="list" useGeneratedKeys="true" keyProperty="id">
         INSERT IGNORE INTO
         department_info(department_id, hospital_id, department_name)
         VALUES

@@ -14,4 +14,10 @@ public class DemoJavaTest {
     void testBoolean() {
         System.out.println(String.valueOf(true));
     }
+
+    @Test
+    void testSubString() {
+        String text = "test.txt";
+        System.out.println(text.substring(text.lastIndexOf(".")));
+    }
 }

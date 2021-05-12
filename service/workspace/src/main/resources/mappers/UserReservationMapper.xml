@@ -10,7 +10,7 @@
         <result column="doctor_id" property="doctorId"/>
         <result column="reservation_data" property="reservationDate"/>
         <result column="reservation_price" property="reservationPrice"/>
-        <result column="reservation_status" property="reservationStatus"/>
+        <result column="reservation_status" property="reservationStatus" javaType="java.lang.Integer"/>
     </resultMap>
 
     <!--查询满足条件的预约订单-->
@@ -48,7 +48,7 @@
     <insert id="insert" parameterType="list">
         INSERT IGNORE INTO
         user_hospital_reservation_info(reservation_id, user_id, doctor_id, reservation_date,
-                                       reservation_price, reservation_status)
+        reservation_price, reservation_status)
         VALUES
         <foreach collection="infos" open="(" close=")" separator="), (" item="item">
             #{item.id}, #{item.userId}, #{item.doctorId}, #{item.reservationDate},

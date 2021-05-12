@@ -6,9 +6,9 @@ import com.hospital.xhu.demo.exception.ProjectException;
 import com.hospital.xhu.demo.service.IDoctorInfoService;
 import com.hospital.xhu.demo.utils.CommonResult;
 import com.hospital.xhu.demo.utils.helper.DoctorInfoHelper;
-import com.hospital.xhu.demo.utils.resultcode.CommonCode;
-import com.hospital.xhu.demo.utils.resultcode.CommonServiceMsg;
-import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
+import com.hospital.xhu.demo.utils.enumerate.CommonCode;
+import com.hospital.xhu.demo.utils.enumerate.CommonServiceMsg;
+import com.hospital.xhu.demo.utils.enumerate.ExceptionCode;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -49,7 +49,7 @@ public class DoctorInfoServiceImpl implements IDoctorInfoService {
      * { code: ExceptionCode, msg: 查询失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> selectDoctorInfo(
+    public CommonResult<?> selectDoctorInfo(
             Map<String, Object> map, Integer pageNum, Integer pageSize,
             String orderedKey, Boolean isDesc) {
         try {
@@ -78,7 +78,7 @@ public class DoctorInfoServiceImpl implements IDoctorInfoService {
      * { code: ExceptionCode, msg: 查询失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> selectDepartmentDoctors(
+    public CommonResult<?> selectDepartmentDoctors(
             Long departmentId, Integer pageNum, Integer pageSize,
             String orderedKey, Boolean isDesc) {
         Map<String, Object> tempDepartmentIdMap = DoctorInfoHelper.tempDepartmentIdMap(departmentId);
@@ -97,7 +97,7 @@ public class DoctorInfoServiceImpl implements IDoctorInfoService {
      * { code: ExceptionCode, msg: 更新失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> updateDoctorInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap) {
+    public CommonResult<?> updateDoctorInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap) {
         if (CollectionUtils.isEmpty(selectKey) || CollectionUtils.isEmpty(newValueMap)) {
             return new CommonResult<>(
                     ExceptionCode.DOCTOR_INFO.getCode(),
@@ -126,12 +126,12 @@ public class DoctorInfoServiceImpl implements IDoctorInfoService {
      * @param doctorInfos 医生列表
      * @return 插入的结果
      * - 成功
-     * { code: 200, msg: 插入成功, data: 插入的数量 }
+     * { code: 200, msg: 插入成功, data: { "count": 插入的数量, "result": 初始化后的数据列表 } }
      * - 失败
      * { code: ExceptionCode, msg: 插入失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> insertDoctorInfo(List<DoctorInfo> doctorInfos) {
+    public CommonResult<?> insertDoctorInfo(List<DoctorInfo> doctorInfos) {
         if (CollectionUtils.isEmpty(doctorInfos)) {
             return new CommonResult<>(
                     ExceptionCode.DOCTOR_INFO.getCode(),
@@ -173,7 +173,7 @@ public class DoctorInfoServiceImpl implements IDoctorInfoService {
      * { code: ExceptionCode, msg: 删除失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> deleteDoctorInfos(Map<String, Object> deleteKey) {
+    public CommonResult<?> deleteDoctorInfos(Map<String, Object> deleteKey) {
         if (CollectionUtils.isEmpty(deleteKey)) {
             return new CommonResult<>(
                     ExceptionCode.DOCTOR_INFO.getCode(),

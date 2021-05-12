@@ -3,6 +3,7 @@ package com.hospital.xhu.demo.service;
 import com.hospital.xhu.demo.entity.UserInfo;
 import com.hospital.xhu.demo.utils.CommonResult;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -17,19 +18,21 @@ public interface IUserService {
     /**
      * 用户登录方法
      *
-     * @param username 用户名
-     * @param password 经过MD5加密后的密码
+     * @param phone    手机号
+     * @param password 登录密码
+     * @param response 响应
      * @return 登录的返回值
      */
-    CommonResult<Object> login(String username, String password);
+    CommonResult<?> login(Long phone, String password, HttpServletResponse response);
 
     /**
      * 用户注销方法
      *
-     * @param username 用户名
+     * @param phone   手机号
+     * @param request 请求
      * @return 注销的结果
      */
-    CommonResult<Object> logout(String username);
+    CommonResult<?> logout(Long phone, HttpServletResponse request);
 
     /**
      * 用户注册
@@ -37,7 +40,7 @@ public interface IUserService {
      * @param userInfo 用户信息
      * @return 注册的结果
      */
-    CommonResult<Object> register(UserInfo userInfo);
+    CommonResult<?> register(UserInfo userInfo);
 
     /**
      * 查询用户信息
@@ -49,7 +52,7 @@ public interface IUserService {
      * @param pageSize   Optional 页大小
      * @return 符合条件的用户信息列表
      */
-    CommonResult<Object> selectUserInfo(
+    CommonResult<?> selectUserInfo(
             Map<String, Object> map, Integer pageNum, Integer pageSize,
             String orderedKey, Boolean isDesc);
 
@@ -60,7 +63,7 @@ public interface IUserService {
      * @param newValueMap 修改的值
      * @return 修改的结果
      */
-    CommonResult<Object> updateUserInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap);
+    CommonResult<?> updateUserInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap);
 
     /**
      * 插入新的用户数据
@@ -68,7 +71,7 @@ public interface IUserService {
      * @param userInfo 用户数据列表
      * @return 插入的结果
      */
-    CommonResult<Object> insertUserInfo(List<UserInfo> userInfo);
+    CommonResult<?> insertUserInfo(List<UserInfo> userInfo);
 
     /**
      * 删除用户的数据
@@ -76,5 +79,5 @@ public interface IUserService {
      * @param deleteKey 需要删除的用户数据
      * @return 删除的结果
      */
-    CommonResult<Object> deleteUserInfo(Map<String, Object> deleteKey);
+    CommonResult<?> deleteUserInfo(Map<String, Object> deleteKey);
 }

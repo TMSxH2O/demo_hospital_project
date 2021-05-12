@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hospital.xhu.demo.dao.IUserMedicalHistoryMapper">
+    <resultMap type="com.hospital.xhu.demo.entity.UserMedicalHistory" id="historyMap">
+        <id column="medical_history_id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="doctor_id" property="doctorId"/>
+        <result column="medical_history_date" property="medicalDate"/>
+        <result column="medical_history_uri" property="medicalHistoryUri"/>
+    </resultMap>
+
+    <!--查询满足条件的用户病例-->
+    <select id="select" resultMap="historyMap" parameterType="map">
+        SELECT medical_history_id, user_id, doctor_id, medical_history_date, medical_history_uri
+        FROM user_medical_history
+        <where>
+            <if test="searchMap != null">
+                <foreach collection="searchMap.entrySet()" separator="and" index="key" item="value">
+                    ${key} = #{value}
+                </foreach>
+            </if>
+        </where>
+        <if test="orderedKey != null and orderedKey != ''">
+            ORDER BY ${orderedKey}
+        </if>
+        <if test="isDesc != null and isDesc">
+            DESC
+        </if>
+    </select>
+
+    <!--查找符合条件的用户病例的数量-->
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT COUNT(medical_history_id) FROM user_medical_history
+        <where>
+            <if test="searchMap != null">
+                <foreach collection="searchMap.entrySet()" separator="and" index="key" item="value">
+                    ${key} = #{value}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <!--添加预约用户病例的列表-->
+    <insert id="insert" parameterType="list">
+        INSERT IGNORE INTO
+        user_medical_history(medical_history_id, user_id, doctor_id, medical_history_date, medical_history_uri)
+        VALUES
+        <foreach collection="infos" open="(" close=")" separator="), (" item="item">
+            #{item.id}, #{item.userId}, #{item.doctorId}, #{item.medicalDate},
+            #{item.medicalHistoryUri}
+        </foreach>
+    </insert>
+
+    <!--更新满足的条件的用户病例的信息-->
+    <update id="update" parameterType="map">
+        UPDATE user_medical_history SET
+        <foreach collection="after.entrySet()" separator="," index="key" item="value">
+            ${key}=#{value}
+        </foreach>
+        <where>
+            <if test="before != null">
+                <foreach collection="before.entrySet()" separator="and" index="key" item="value">
+                    ${key}=#{value}
+                </foreach>
+            </if>
+        </where>
+    </update>
+
+    <!--删除满足一定条件的用户病例信息，需要之后进行封装，最好不要传空Map进来，不然会直接删除所有的数据-->
+    <delete id="delete" parameterType="map">
+        DELETE FROM user_medical_history
+        <where>
+            <if test="deleteMap != null">
+                <foreach collection="deleteMap.entrySet()" separator="and" index="key" item="value">
+                    ${key}=#{value}
+                </foreach>
+            </if>
+        </where>
+    </delete>
+</mapper>

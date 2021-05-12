@@ -25,7 +25,7 @@ public interface IUserReservationService {
      * @param pageSize   Optional 页大小
      * @return 符合条件的预约订单信息列表
      */
-    CommonResult<Object> selectUserReservation(
+    CommonResult<?> selectUserReservation(
             Map<String, Object> map, Integer pageNum, Integer pageSize,
             String orderedKey, Boolean isDesc);
 
@@ -36,15 +36,15 @@ public interface IUserReservationService {
      * @param newValueMap 修改的值
      * @return 修改的结果
      */
-    CommonResult<Object> updateUserReservation(Map<String, Object> selectKey, Map<String, Object> newValueMap);
+    CommonResult<?> updateUserReservation(Map<String, Object> selectKey, Map<String, Object> newValueMap);
 
     /**
      * 插入新的预约订单数据
      *
-     * @param doctorInfos 预约订单数据列表
+     * @param userReservations 预约订单数据列表
      * @return 插入的结果
      */
-    CommonResult<Object> insertUserReservation(List<UserReservation> doctorInfos);
+    CommonResult<?> insertUserReservation(List<UserReservation> userReservations);
 
     /**
      * 删除预约订单的数据
@@ -52,5 +52,5 @@ public interface IUserReservationService {
      * @param deleteKey 需要删除的预约订单数据
      * @return 删除的结果
      */
-    CommonResult<Object> deleteUserReservation(Map<String, Object> deleteKey);
+    CommonResult<?> deleteUserReservation(Map<String, Object> deleteKey);
 }

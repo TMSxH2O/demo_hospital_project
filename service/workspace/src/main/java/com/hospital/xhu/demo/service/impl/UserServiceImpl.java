@@ -5,16 +5,18 @@ import com.hospital.xhu.demo.entity.UserInfo;
 import com.hospital.xhu.demo.exception.ProjectException;
 import com.hospital.xhu.demo.service.IUserService;
 import com.hospital.xhu.demo.utils.CommonResult;
+import com.hospital.xhu.demo.utils.enumerate.CommonCode;
+import com.hospital.xhu.demo.utils.enumerate.CommonServiceMsg;
+import com.hospital.xhu.demo.utils.enumerate.ExceptionCode;
 import com.hospital.xhu.demo.utils.helper.UserInfoHelper;
-import com.hospital.xhu.demo.utils.resultcode.CommonCode;
-import com.hospital.xhu.demo.utils.resultcode.CommonServiceMsg;
-import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,10 +42,11 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * 验证用户登录信息
-     * 目前仅支持使用用户名和密码进行登录
+     * 目前仅支持使用手机号和密码进行登录
      *
-     * @param username 用户名
-     * @param password 经过MD5加密后的密码
+     * @param phone    手机号
+     * @param password 登陆密码
+     * @param response 响应
      * @return 登录结果
      * - 成功
      * { code: 200, msg: "登录成功", data: UserInfo }
@@ -51,24 +54,24 @@ public class UserServiceImpl implements IUserService {
      * { code: ExceptionCode, msg: 登录失败提示信息, data: null }
      */
     @Override
-    public CommonResult<Object> login(String username, String password) {
+    public CommonResult<?> login(Long phone, String password, HttpServletResponse response) {
         // 传入的值都不能是空
-        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
+        if (null == phone || StringUtils.isEmpty(password)) {
             return new CommonResult<>(
                     ExceptionCode.USER_INFO.getCode(), "登录的信息不能为空");
         }
 
         try {
-            Map<String, Object> usernameMap = UserInfoHelper.tempUsernameMap(username);
+            Map<String, Object> userPhoneMap = UserInfoHelper.tempUserPhoneMap(phone);
             // 根据用户名查询用户信息
-            UserInfo userInfo = userInfoMapper.selectPrimary(usernameMap);
+            UserInfo tempUserInfo = userInfoMapper.selectPrimary(userPhoneMap);
             // 查询的结果为空
-            if (null == userInfo) {
+            if (null == tempUserInfo) {
                 return new CommonResult<>(
-                        ExceptionCode.USER_INFO.getCode(), "没有查询到的对应的用户，请检查用户名是否正确");
+                        ExceptionCode.USER_INFO.getCode(), "没有查询到的对应的用户，请检查手机号是否正确");
             }
             // 获取用户密码加密的盐
-            String pwdSalt = userInfo.getPasswordSalt();
+            String pwdSalt = tempUserInfo.getPasswordSalt();
             // 防止数据异常
             if (StringUtils.isEmpty(pwdSalt)) {
                 log.error("没有正确获取到用户的密码盐信息，请检查数据库数据是否正确:" + pwdSalt);
@@ -77,17 +80,15 @@ public class UserServiceImpl implements IUserService {
             // 合成用户输入密码加密后的结果
             String tempUserPassword = UserInfoHelper.getMd5UserPassword(password, pwdSalt);
             // 密码一致
-            if (StringUtils.isEmpty(tempUserPassword) && tempUserPassword.equals(userInfo.getPassword())) {
+            if (!StringUtils.isEmpty(tempUserPassword) && tempUserPassword.equals(tempUserInfo.getPassword())) {
                 // 更新登录状态
-                int result = updateLoginUserInfo(userInfo);
-                if (result > 0) {
-                    // 返回登录成功信息
-                    return new CommonResult<>(CommonCode.SUCCESS.getCode(), "登录成功", userInfo);
-                } else {
-                    return new CommonResult<>(ExceptionCode.USER_INFO.getCode(), "用户信息更新失败");
-                }
+                String sign = updateLoginUserInfo(tempUserInfo, true);
+                // 添加Token
+                response.addHeader("token", UserInfoHelper.getToken(tempUserInfo, sign));
+                // 返回登录成功信息
+                return new CommonResult<>(CommonCode.SUCCESS.getCode(), "登录成功", tempUserInfo);
             } else {  // 密码不一致或者密码加密失败
-                return new CommonResult<>(ExceptionCode.USER_INFO.getCode(), "用户名或密码错误，请重试");
+                return new CommonResult<>(ExceptionCode.USER_INFO.getCode(), "手机号或密码错误，请重试");
             }
         } catch (ProjectException e) {  // 抛出异常
             return e.getResult();
@@ -97,7 +98,8 @@ public class UserServiceImpl implements IUserService {
     /**
      * 用户注销的方法
      *
-     * @param username 用户名
+     * @param phone    手机号
+     * @param response 请求
      * @return 注销的结果
      * - 成功
      * { code: 200, msg: "注销成功", data: UserInfo }
@@ -105,21 +107,19 @@ public class UserServiceImpl implements IUserService {
      * { code: ExceptionCode, msg: 注册失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> logout(String username) {
-        if (StringUtils.isEmpty(username)) {
-            return new CommonResult<>(ExceptionCode.USER_INFO.getCode(), "注销的用户信息不能为空");
+    public CommonResult<?> logout(Long phone, HttpServletResponse response) {
+        if (StringUtils.isEmpty(phone)) {
+            return new CommonResult<>(ExceptionCode.USER_INFO.getCode(), "注销的用户手机号不能为空");
         }
 
         try {
             // 获取用户信息
-            UserInfo userInfo = userInfoMapper.selectPrimary(UserInfoHelper.tempUsernameMap(username));
+            UserInfo userInfo = userInfoMapper.selectPrimary(UserInfoHelper.tempUserPhoneMap(phone));
             // 更新用户信息
-            int result = updateLoginUserInfo(userInfo);
-            if (result > 0) {
-                return new CommonResult<>(CommonCode.SUCCESS.getCode(), "用户注销成功", userInfo);
-            } else {
-                return new CommonResult<>(ExceptionCode.USER_INFO.getCode(), "更新用户信息失败:" + userInfo);
-            }
+            updateLoginUserInfo(userInfo, false);
+            // 清理Token
+            response.setHeader("token", null);
+            return new CommonResult<>(CommonCode.SUCCESS.getCode(), "用户注销成功", userInfo);
         } catch (ProjectException e) {
             return e.getResult();
         }
@@ -136,22 +136,16 @@ public class UserServiceImpl implements IUserService {
      * { code: ExceptionCode, msg: 注册失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> register(UserInfo userInfo) {
+    public CommonResult<?> register(UserInfo userInfo) {
         // 检查必要的用户信息
         if (null == userInfo || StringUtils.isEmpty(userInfo.getUsername())
-                || StringUtils.isEmpty(userInfo.getPassword())) {
+                || StringUtils.isEmpty(userInfo.getPassword()) || null == userInfo.getPhone()) {
             return new CommonResult<>(ExceptionCode.USER_INFO.getCode(), "用户注册失败，缺少必要的用户信息:" + userInfo);
         }
 
-        // 对应用户信息进行初始化
-        userInfo.init();
-
         try {
-            // 获取密码的盐
-            String md5PassSalt = UserInfoHelper.getMd5PassSalt();
-            // 使用盐生成最终存储数据库的密码
-            String md5UserPassword = UserInfoHelper.getMd5UserPassword(userInfo.getPassword(), md5PassSalt);
-            userInfo.setPassword(md5UserPassword);
+            // 对应用户信息进行初始化
+            userInfo.init();
             // 尝试插入用户信息
             int result = userInfoMapper.insert(Collections.singletonList(userInfo));
             if (result > 0) {
@@ -180,7 +174,7 @@ public class UserServiceImpl implements IUserService {
      * { code: ExceptionCode, msg: 查询失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> selectUserInfo(
+    public CommonResult<?> selectUserInfo(
             Map<String, Object> map, Integer pageNum, Integer pageSize,
             String orderedKey, Boolean isDesc) {
         try {
@@ -206,7 +200,7 @@ public class UserServiceImpl implements IUserService {
      * { code: ExceptionCode, msg: 更新失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> updateUserInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap) {
+    public CommonResult<?> updateUserInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap) {
         if (CollectionUtils.isEmpty(selectKey) || CollectionUtils.isEmpty(newValueMap)) {
             return new CommonResult<>(
                     ExceptionCode.USER_INFO.getCode(),
@@ -240,7 +234,7 @@ public class UserServiceImpl implements IUserService {
      * { code: ExceptionCode, msg: 添加失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> insertUserInfo(List<UserInfo> userInfos) {
+    public CommonResult<?> insertUserInfo(List<UserInfo> userInfos) {
         if (CollectionUtils.isEmpty(userInfos)) {
             return new CommonResult<>(
                     ExceptionCode.USER_INFO.getCode(),
@@ -282,7 +276,7 @@ public class UserServiceImpl implements IUserService {
      * { code: ExceptionCode, msg: 删除失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> deleteUserInfo(Map<String, Object> deleteKey) {
+    public CommonResult<?> deleteUserInfo(Map<String, Object> deleteKey) {
         if (CollectionUtils.isEmpty(deleteKey)) {
             return new CommonResult<>(
                     ExceptionCode.USER_INFO.getCode(),
@@ -312,14 +306,26 @@ public class UserServiceImpl implements IUserService {
      *
      * @param userInfo 登录的用户信息
      */
-    private int updateLoginUserInfo(UserInfo userInfo) throws ProjectException {
+    private String updateLoginUserInfo(UserInfo userInfo, Boolean isLogin) throws ProjectException {
         // 需要修改的Map
-        Map<String, Object> tempUserInfo = new HashMap<>(2);
-        // 如果已经登录变为没有登录，如果没有登录变为已经登录
-        UserInfoHelper.lastLoginTimeNowMap(tempUserInfo);
+        Map<String, Object> tempUserInfo = new HashMap<>(3);
+        // 更新登录状态
+        UserInfoHelper.userIsLoginMap(tempUserInfo, isLogin);
+        // 刷新登录时间为当前时间
+        LocalDateTime localDateTime = UserInfoHelper.lastLoginTimeNowMap(tempUserInfo);
+        // 获取用户登录的Sign
+        String loginSign = UserInfoHelper.userLoginSignMap(tempUserInfo);
 
         // 更新用户信息
-        return userInfoMapper.update(UserInfoHelper.tempUsernameMap(userInfo.getUsername()), tempUserInfo);
+        int result = userInfoMapper.update(UserInfoHelper.tempUsernameMap(userInfo.getUsername()), tempUserInfo);
+        if (result == 0) {
+            throw new ProjectException(ExceptionCode.USER_INFO,
+                    CommonServiceMsg.UPDATE_FAILED.getMsg(CLASS_INFO_NAME, userInfo, tempUserInfo));
+        }
+        // 更新对象数据
+        userInfo.setIsLogin(isLogin);
+        userInfo.setLastLoginTime(localDateTime);
+        return loginSign;
     }
 }
 

@@ -11,9 +11,11 @@
         <result column="user_pwd_salt" property="passwordSalt"/>
         <result column="user_email" property="email"/>
         <result column="user_phone" property="phone"/>
-        <result column="user_is_login" property="isLogin"/>
-        <result column="user_last_login_time" property="lastLoginTime"/>
+        <result column="user_is_login" property="isLogin" jdbcType="TINYINT" javaType="java.lang.Boolean"/>
+        <result column="user_last_login_time" property="lastLoginTime"
+                typeHandler="org.apache.ibatis.type.LocalDateTimeTypeHandler"/>
         <result column="user_image_uri" property="userImageUri"/>
+        <result column="user_login_sign" property="userLoginSign"/>
     </resultMap>
 
     <!--测试专用方法，查询所有用户信息-->
@@ -30,8 +32,8 @@
 
     <!--查询满足条件的用户-->
     <select id="select" resultMap="usermap" parameterType="map">
-        SELECT user_id, username, user_pwd, user_pwd_salt, user_email, user_phone, user_last_login_time,
-        user_image_uri
+        SELECT user_id, username, user_pwd, user_pwd_salt, user_email, user_phone,
+               user_is_login, user_last_login_time, user_image_uri, user_login_sign
         FROM user_info
         <where>
             <if test="searchMap != null">
@@ -52,11 +54,12 @@
     <insert id="insert" parameterType="list" useGeneratedKeys="true" keyProperty="id">
         INSERT IGNORE INTO
         user_info(user_id, username, user_pwd, user_pwd_salt, user_email,
-        user_phone, user_is_login, user_last_login_time, user_image_uri)
+        user_phone, user_is_login, user_last_login_time, user_image_uri, user_login_sign)
         VALUES
         <foreach collection="infos" open="(" close=")" separator="), (" item="item">
             #{item.id}, #{item.username}, #{item.password}, #{item.passwordSalt}, #{item.email},
-            #{item.phone}, #{item.isLogin}, #{item.lastLoginTime}, #{item.userImageUri}
+            #{item.phone}, #{item.isLogin}, #{item.lastLoginTime}, #{item.userImageUri},
+            #{item.userLoginSign}
         </foreach>
     </insert>
 

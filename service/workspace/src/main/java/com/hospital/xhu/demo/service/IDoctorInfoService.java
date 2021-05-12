@@ -25,7 +25,7 @@ public interface IDoctorInfoService {
      * @param pageSize   Optional 页大小
      * @return 符合条件的医生信息列表
      */
-    CommonResult<Object> selectDoctorInfo(
+    CommonResult<?> selectDoctorInfo(
             Map<String, Object> map, Integer pageNum, Integer pageSize,
             String orderedKey, Boolean isDesc);
 
@@ -39,7 +39,7 @@ public interface IDoctorInfoService {
      * @param pageSize     Optional 页大小
      * @return 符合条件的医生列表
      */
-    CommonResult<Object> selectDepartmentDoctors(
+    CommonResult<?> selectDepartmentDoctors(
             Long departmentId, Integer pageNum, Integer pageSize,
             String orderedKey, Boolean isDesc);
 
@@ -50,7 +50,7 @@ public interface IDoctorInfoService {
      * @param newValueMap 修改的值
      * @return 修改的结果
      */
-    CommonResult<Object> updateDoctorInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap);
+    CommonResult<?> updateDoctorInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap);
 
     /**
      * 插入新的医生数据
@@ -58,7 +58,7 @@ public interface IDoctorInfoService {
      * @param doctorInfos 医生数据列表
      * @return 插入的结果
      */
-    CommonResult<Object> insertDoctorInfo(List<DoctorInfo> doctorInfos);
+    CommonResult<?> insertDoctorInfo(List<DoctorInfo> doctorInfos);
 
     /**
      * 删除医生的数据
@@ -66,5 +66,5 @@ public interface IDoctorInfoService {
      * @param deleteKey 需要删除的医生数据
      * @return 删除的结果
      */
-    CommonResult<Object> deleteDoctorInfos(Map<String, Object> deleteKey);
+    CommonResult<?> deleteDoctorInfos(Map<String, Object> deleteKey);
 }

@@ -15,5 +15,4 @@ import org.springframework.stereotype.Repository;
 @Mapper
 @Repository("userReservationMapper")
 public interface IUserReservationMapper extends IGeneralMapper<UserReservation> {
-
 }

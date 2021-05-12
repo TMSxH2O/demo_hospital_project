@@ -1,52 +1,105 @@
 spring:
-  profiles:
-    active: demo1
----
-spring:
   application:
     name: demo_hospital_project
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     name: mysql
-    url: jdbc:mysql://111.229.139.12:3306/demo_hospital_project?serverTimezone=GMT%2B8
+    url: jdbc:mysql://111.229.139.12:3306/demo_hospital_project?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8
     username: root
     password: root
+    tomcat:
+      initSQL: SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci
+  profiles:
+    active: demo1
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+  # 设置freemarker
+  freemarker:
+    # 开发过程建议关闭缓存
+    cache: true
+    check-template-location: false
+    charset: UTF-8
+    # 默认后缀就是.ftl
+    suffix: .ftl
+    template-loader-path: classPath:/templates/
+
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+mybatis:
+  mapper-locations: classpath:/mappers/*.xml
+  type-aliases-package: com.hospital.xhu.demo.entity
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 显示MyBatis的log信息到控制台
+
+cache:
+  cache_size: 1000
+  limit_time: 1200  # LRU删除的时间
+
+file:
+  # 保存头像文件路径
+  save_img_path: /var/local/demo_hospital_project/img
+  # 头像保存的url
+  save_img_url: http://111.229.139.12:8080/img/
+  # 保存病例文件路劲
+  save_medical_path: /var/local/demo_hospital_project/template
+#  save_medical_path: F:/demo
+  # 病例文件的url
+  save_medical_url: http://111.229.139.12:8080/template/
+  # 使用的病例模板
+  medical_template: classpath:/templates/medical.html
+
+pay:
+  alipay:
+    # 支付网关
+    gatewayUrl: https://openapi.alipaydev.com/gateway.do
+    # 商户APPid
+    appid: 2021000117648944
+    # 密钥
+    appPrivateKey: MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCcz+shKt0eveMFl6gxTPrh5ZyCvVOqHLQySWd9mx2TfD7FIMtfW7IKjy7Yyddx5DSY5IawTiUuuNu9Ovx2sc9jL0XF2kdSX3HH/qQ0ArrEPwHono91UnL1SIvyJDGiMFYbkL9ueb104VhBxmhBeJMjAVoUVqeJKx9IPQWZ9AiXdMiIT20zU9u9iJvmf67H8Pwh7nAENsDwPTUx2X+5JZX5udu/RTKTDhk+V1X7Ezp4IaI0S0xg9tBe729NKSkOdvTDh6M7BOXRfiEatGA83925A46Zwz9LDJDja5Orvpbz7P69k6iiIB516RhmyATQBS8KwmRqi1aRBdcTxXuqiJYBAgMBAAECggEAXzf1i79OY6NkHfo3/C/FS7Q0NEMocWxakwp1mBS/gdX4+5RtSasRUk4dYTA27YZn1cs2agoZk+RWMfKGaMCRsKV81aY0lrU0Dv/1z0s1A4NK8miNrezxtzVlHRSTOuvk7XoYc8nim/1VrSMAHXlMxv3EKANyWd1gcmnzY8eGDAi+pa8fGNjZYgFUjS6W7spOUI2+PkOctB6/44j1EPni4klYMh/ZeWZUuw1mp2OTZSxa/vczDj28A7sVhszS/u21+Cr/ZQ3TUwHkK7b1D/4aYZTLOpq/bQUX3ndLL8VHIIl5UO6qv/g+Ml+QV6StTV7s9muFF11511jwptzaHHxpQQKBgQDaCOW7UKczmqqDDyEBonXHqPWZyIUtFcUpAuR9UCfv7pEvboGaP8XvONNdyezLDSDxyTxX2IpQmNwPcCP1Ty/aXchkhHm5dgQtN5Moggx6DAwxyyw1U4UICjJbXchwaAbHtVo8y3xMmZwv+NO9i7dRlKKqqPP+v3cURe6+nnXsOQKBgQC4Hfe+HwQa5rvondAqgnmIHxCBSs4+OdJpVLuB9qUlDHAEn8/kGQAdMrtkM/DJIJm/Z6q/q50PWSH5xDZow0s25XK4n7l4CtMp+MNUd1fDvBoWwyOzuLo6IZFQtFHnmDo3th7UUzbjpMxdvWNtdYPQ9b6XRrfDjXqc5vtoFA2ICQKBgQDVksmWBpcB0Ysc/gDS3RSKE1Mg5G6vjxel6JNwvMeiGwpUb+a79aQphHxm7pjo/V87+GcHlbFG6bUF2k8eyAaT3DGjZLDnnlbRBBM+JsWZ95sqW15ejgVNrs9M+DyS/xNFJLvTuW90iTOZOiAPF4DmhLYifYUkEODQFwCZ8BaK4QKBgQCQPyJGuKQNs3HKuEFL3Lb8d2IF+aaFx+VakoDpPGR8Fzd32AEW8qNNPN7ljW/7E2iBNeXnjrtZN/rPZPM/tqmp06/Ch5jWPJzdyEC4X1vKRQenh7Dj8Dkuq/feY7e7m18ZIL0cmilpxkY6ttM8AZKJVs7AVC5KrgA/BxQ2oWdMiQKBgFVs5POS/6VatuMQAmjCWXly4Ee6uwc5CkJCxSJVE8xO0YJmrX7nGnVNTzsUXoQdv11tpEkdN72mSxii9PKV5o5pkOSIsHghDNhmy8LYgzVinKub3GV/YMOL1ZIHsZYEWJ/NmYohjIsu4IPBxKNVft1yzP2vrXCWne92oEdlAUgj
+    # 应用公钥
+    alipayPublicKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnM/rISrdHr3jBZeoMUz64eWcgr1Tqhy0MklnfZsdk3w+xSDLX1uyCo8u2MnXceQ0mOSGsE4lLrjbvTr8drHPYy9FxdpHUl9xx/6kNAK6xD8B6J6PdVJy9UiL8iQxojBWG5C/bnm9dOFYQcZoQXiTIwFaFFaniSsfSD0FmfQIl3TIiE9tM1PbvYib5n+ux/D8Ie5wBDbA8D01Mdl/uSWV+bnbv0Uykw4ZPldV+xM6eCGiNEtMYPbQXu9vTSkpDnb0w4ejOwTl0X4hGrRgPN/duQOOmcM/SwyQ42uTq76W8+z+vZOooiAedekYZsgE0AUvCsJkaotWkQXXE8V7qoiWAQIDAQAB
+    # 支付同步通知
+#    returnUrl: http://111.229.139.12:8080/alipay/callback
+    returnUrl: http://localhost:12301/alipay/callback
+    # 支付异步通知
+#    notifyUrl: http://111.229.139.12:8080/alipay/notify
+    notifyUrl: http://localhost:12301/alipay/notify
+    # 扫码支付成功后跳转的URL
+#    returnUrlForScan: http://111.229.139.12:8080/alipay/success
+    returnUrlForScan: http://localhost:12301/alipay/success
+    # 支付模型
+    productCode: FAST_INSTANT_TRADE_PAY
+
+  subjectName: 医院预约挂号平台与电子病历管理系统
+
+logging:
+  level:
+    root: debug
+
+---
+spring:
   profiles: demo1
 
 server:
   port: 12301
 
-mybatis:
-  mapper-locations: classpath:mappers/*.xml
-  type-aliases-package: com.hospital.xhu.demo.entity
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 显示MyBatis的log信息到控制台
-
-cache:
-  cache_size: 1000
-  limit_time: 1200  # LRU删除的时间
+logging:
+  file:
+    name: ./logs/logger_demo1.log
 ---
 spring:
-  application:
-    name: demo_hospital_project
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    name: mysql
-    url: jdbc:mysql://111.229.139.12:3306/demo_hospital_project?serverTimezone=GMT%2B8
-    username: root
-    password: root
   profiles: demo2
 
 server:
   port: 12302
 
-mybatis:
-  mapper-locations: classpath:mappers/*.xml
-  type-aliases-package: com.hospital.xhu.demo.entity
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 显示MyBatis的log信息到控制台
-
-cache:
-  cache_size: 1000
-  limit_time: 1200  # LRU删除的时间
-
+logging:
+  file:
+    name: ./logs/logger_demo2.log

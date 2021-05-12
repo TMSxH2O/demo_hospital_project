@@ -1,17 +1,14 @@
 package com.hospital.xhu.demo.service.impl;
 
-import com.hospital.xhu.demo.dao.impl.DoctorInfoMapperImpl;
-import com.hospital.xhu.demo.dao.impl.UserInfoMapperImpl;
 import com.hospital.xhu.demo.dao.impl.UserReservationMapperImpl;
 import com.hospital.xhu.demo.entity.UserReservation;
 import com.hospital.xhu.demo.exception.ProjectException;
 import com.hospital.xhu.demo.service.IUserReservationService;
 import com.hospital.xhu.demo.utils.CommonResult;
-import com.hospital.xhu.demo.utils.resultcode.CommonCode;
-import com.hospital.xhu.demo.utils.resultcode.CommonServiceMsg;
-import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
+import com.hospital.xhu.demo.utils.enumerate.CommonCode;
+import com.hospital.xhu.demo.utils.enumerate.CommonServiceMsg;
+import com.hospital.xhu.demo.utils.enumerate.ExceptionCode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -22,10 +19,12 @@ import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
+ * 用户订单信息相关操作
  *
  * @author TMS_H2O
  * @version V1.0
  * @date 2021/4/30
+ * @deprecated 数据库中存放的用户订单信息较少，替换为TempUserReservationServiceImpl更好
  */
 @Service
 @Slf4j
@@ -52,7 +51,7 @@ public class UserReservationServiceImpl implements IUserReservationService {
      * { code: ExceptionCode, msg: 查询失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> selectUserReservation(
+    public CommonResult<?> selectUserReservation(
             Map<String, Object> map, Integer pageNum, Integer pageSize,
             String orderedKey, Boolean isDesc) {
         try {
@@ -78,7 +77,7 @@ public class UserReservationServiceImpl implements IUserReservationService {
      * { code: ExceptionCode, msg: 更新失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> updateUserReservation(Map<String, Object> selectKey, Map<String, Object> newValueMap) {
+    public CommonResult<?> updateUserReservation(Map<String, Object> selectKey, Map<String, Object> newValueMap) {
         if (CollectionUtils.isEmpty(selectKey) || CollectionUtils.isEmpty(newValueMap)) {
             return new CommonResult<>(
                     ExceptionCode.USER_RESERVATION.getCode(),
@@ -107,12 +106,12 @@ public class UserReservationServiceImpl implements IUserReservationService {
      * @param userReservations 预约订单列表
      * @return 插入的结果
      * - 成功
-     * { code: 200, msg: 插入成功, data: 插入的数量 }
+     * { code: 200, msg: 插入成功, data: { "count": 插入的数量, "result": 初始化后的数据列表 } }
      * - 失败
      * { code: ExceptionCode, msg: 插入失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> insertUserReservation(List<UserReservation> userReservations) {
+    public CommonResult<?> insertUserReservation(List<UserReservation> userReservations) {
         if (CollectionUtils.isEmpty(userReservations)) {
             return new CommonResult<>(
                     ExceptionCode.USER_RESERVATION.getCode(),
@@ -154,7 +153,7 @@ public class UserReservationServiceImpl implements IUserReservationService {
      * { code: ExceptionCode, msg: 删除失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> deleteUserReservation(Map<String, Object> deleteKey) {
+    public CommonResult<?> deleteUserReservation(Map<String, Object> deleteKey) {
         if (CollectionUtils.isEmpty(deleteKey)) {
             return new CommonResult<>(
                     ExceptionCode.USER_RESERVATION.getCode(),
@@ -176,28 +175,5 @@ public class UserReservationServiceImpl implements IUserReservationService {
         } catch (ProjectException e) {
             return e.getResult();
         }
-    }
-
-    /**
-     * 用于获取用户信息的Mapper对象
-     *
-     * @param mapper 自动注入
-     * @return 自动注入的mapper对象
-     */
-    @Autowired
-    private UserInfoMapperImpl getUserInfoMapperImpl(@Qualifier("userInfoMapperImpl") UserInfoMapperImpl mapper) {
-        return mapper;
-    }
-
-    /**
-     * 用于获取医生信息的Mapper对象
-     *
-     * @param mapper 自动注入
-     * @return 自动注入的mapper对象
-     */
-    @Autowired
-    private DoctorInfoMapperImpl getDoctorInfoMapperImpl(
-            @Qualifier("doctorInfoMapperImpl") DoctorInfoMapperImpl mapper) {
-        return mapper;
     }
 }

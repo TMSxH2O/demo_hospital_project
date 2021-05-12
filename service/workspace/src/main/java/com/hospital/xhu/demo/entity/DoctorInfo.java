@@ -1,7 +1,7 @@
 package com.hospital.xhu.demo.entity;
 
 import com.hospital.xhu.demo.exception.ProjectException;
-import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
+import com.hospital.xhu.demo.utils.enumerate.ExceptionCode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

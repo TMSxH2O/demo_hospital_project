@@ -1,8 +1,7 @@
 package com.hospital.xhu.demo.utils;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
 import java.io.Serializable;
 
@@ -15,12 +14,11 @@ import java.io.Serializable;
  * @date 2021/4/11
  */
 @AllArgsConstructor
-@Getter
-@ToString
+@Data
 public class CommonResult<T> implements Serializable {
     private final int code;
-    private final String msg;
-    private final T data;
+    private String msg;
+    private T data;
 
     public CommonResult(int code, String msg) {
         this.code = code;

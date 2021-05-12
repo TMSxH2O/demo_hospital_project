@@ -5,9 +5,9 @@ import com.hospital.xhu.demo.entity.DepartmentInfo;
 import com.hospital.xhu.demo.exception.ProjectException;
 import com.hospital.xhu.demo.service.IDepartmentInfoService;
 import com.hospital.xhu.demo.utils.CommonResult;
-import com.hospital.xhu.demo.utils.resultcode.CommonCode;
-import com.hospital.xhu.demo.utils.resultcode.CommonServiceMsg;
-import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
+import com.hospital.xhu.demo.utils.enumerate.CommonCode;
+import com.hospital.xhu.demo.utils.enumerate.CommonServiceMsg;
+import com.hospital.xhu.demo.utils.enumerate.ExceptionCode;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -48,7 +48,7 @@ public class DepartmentInfoServiceImpl implements IDepartmentInfoService {
      * { code: ExceptionCode, msg: 查询失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> selectDepartmentInfo(
+    public CommonResult<?> selectDepartmentInfo(
             Map<String, Object> map, Integer pageNum, Integer pageSize,
             String orderedKey, Boolean isDesc) {
         try {
@@ -74,7 +74,7 @@ public class DepartmentInfoServiceImpl implements IDepartmentInfoService {
      * { code: ExceptionCode, msg: 更新失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> updateDepartmentInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap) {
+    public CommonResult<?> updateDepartmentInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap) {
         if (CollectionUtils.isEmpty(selectKey) || CollectionUtils.isEmpty(newValueMap)) {
             return new CommonResult<>(
                     ExceptionCode.DEPARTMENT_INFO.getCode(),
@@ -103,12 +103,12 @@ public class DepartmentInfoServiceImpl implements IDepartmentInfoService {
      * @param departmentInfos 医院数据列表
      * @return 插入的结果
      * - 成功
-     * { code: 200, msg: 插入成功, data: 插入的数量 }
+     * { code: 200, msg: 插入成功, data: { "count": 插入的数量, "result": 初始化后的数据列表 } }
      * - 失败
      * { code: ExceptionCode, msg: 插入失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> insertDepartmentInfo(List<DepartmentInfo> departmentInfos) {
+    public CommonResult<?> insertDepartmentInfo(List<DepartmentInfo> departmentInfos) {
         if (CollectionUtils.isEmpty(departmentInfos)) {
             return new CommonResult<>(
                     ExceptionCode.DEPARTMENT_INFO.getCode(),
@@ -150,7 +150,7 @@ public class DepartmentInfoServiceImpl implements IDepartmentInfoService {
      * { code: ExceptionCode, msg: 删除失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> deleteDepartmentInfo(Map<String, Object> deleteKey) {
+    public CommonResult<?> deleteDepartmentInfo(Map<String, Object> deleteKey) {
         if (CollectionUtils.isEmpty(deleteKey)) {
             return new CommonResult<>(
                     ExceptionCode.DEPARTMENT_INFO.getCode(),

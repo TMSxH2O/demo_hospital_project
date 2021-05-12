@@ -5,9 +5,9 @@ import com.hospital.xhu.demo.entity.HospitalInfo;
 import com.hospital.xhu.demo.exception.ProjectException;
 import com.hospital.xhu.demo.service.IHospitalInfoService;
 import com.hospital.xhu.demo.utils.CommonResult;
-import com.hospital.xhu.demo.utils.resultcode.CommonCode;
-import com.hospital.xhu.demo.utils.resultcode.CommonServiceMsg;
-import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
+import com.hospital.xhu.demo.utils.enumerate.CommonCode;
+import com.hospital.xhu.demo.utils.enumerate.CommonServiceMsg;
+import com.hospital.xhu.demo.utils.enumerate.ExceptionCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -50,7 +50,7 @@ public class HospitalInfoServiceImpl implements IHospitalInfoService {
      * { code: ExceptionCode, msg: 查询失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> selectHospitalInfo(
+    public CommonResult<?> selectHospitalInfo(
             Map<String, Object> map, Integer pageNum,
             Integer pageSize, String orderedKey, Boolean isDesc) {
         try {
@@ -76,7 +76,7 @@ public class HospitalInfoServiceImpl implements IHospitalInfoService {
      * { code: ExceptionCode, msg: 更新失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> updateHospitalInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap) {
+    public CommonResult<?> updateHospitalInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap) {
         if (CollectionUtils.isEmpty(selectKey) || CollectionUtils.isEmpty(newValueMap)) {
             return new CommonResult<>(
                     ExceptionCode.HOSPITAL_INFO.getCode(),
@@ -105,12 +105,12 @@ public class HospitalInfoServiceImpl implements IHospitalInfoService {
      * @param hospitalInfos 医院数据列表
      * @return 插入的结果
      * - 成功
-     * { code: 200, msg: 插入成功, data: 插入的数量 }
+     * { code: 200, msg: 插入成功, data: { "count": 插入的数量, "result": 初始化后的数据列表 } }
      * - 失败
      * { code: ExceptionCode, msg: 插入失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> insertHospitalInfo(List<HospitalInfo> hospitalInfos) {
+    public CommonResult<?> insertHospitalInfo(List<HospitalInfo> hospitalInfos) {
         if (CollectionUtils.isEmpty(hospitalInfos)) {
             return new CommonResult<>(
                     ExceptionCode.HOSPITAL_INFO.getCode(),
@@ -152,7 +152,7 @@ public class HospitalInfoServiceImpl implements IHospitalInfoService {
      * { code: ExceptionCode, msg: 删除失败信息, data: null }
      */
     @Override
-    public CommonResult<Object> deleteHospitalInfo(Map<String, Object> deleteKey) {
+    public CommonResult<?> deleteHospitalInfo(Map<String, Object> deleteKey) {
         if (CollectionUtils.isEmpty(deleteKey)) {
             return new CommonResult<>(
                     ExceptionCode.HOSPITAL_INFO.getCode(),

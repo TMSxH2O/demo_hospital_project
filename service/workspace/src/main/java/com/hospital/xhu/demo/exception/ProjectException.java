@@ -1,7 +1,7 @@
 package com.hospital.xhu.demo.exception;
 
 import com.hospital.xhu.demo.utils.CommonResult;
-import com.hospital.xhu.demo.utils.resultcode.ExceptionCode;
+import com.hospital.xhu.demo.utils.enumerate.ExceptionCode;
 
 import java.util.Arrays;
 
@@ -14,11 +14,11 @@ import java.util.Arrays;
  */
 public class ProjectException extends Exception {
     private final ExceptionCode code;
-    private final String msg;
+    private final String detailMessage;
 
     public ProjectException(ExceptionCode code, String msg) {
         this.code = code;
-        this.msg = msg;
+        this.detailMessage = msg;
     }
 
     public ExceptionCode getCode() {
@@ -26,11 +26,11 @@ public class ProjectException extends Exception {
     }
 
     public String getMsg() {
-        return msg;
+        return detailMessage;
     }
 
-    public CommonResult<Object> getResult() {
-        return new CommonResult<>(code.getCode(), msg);
+    public CommonResult<?> getResult() {
+        return new CommonResult<>(code.getCode(), detailMessage);
     }
 
     @Override

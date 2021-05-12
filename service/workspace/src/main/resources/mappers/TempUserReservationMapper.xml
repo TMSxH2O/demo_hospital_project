@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hospital.xhu.demo.dao.ITempUserReservationMapper">
+    <resultMap id="temp" type="com.hospital.xhu.demo.entity.TempUserReservation">
+        <id column="reservation_id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="doctor_id" property="doctorId"/>
+        <result column="doctor_name" property="doctorName"/>
+        <result column="department_name" property="departmentName"/>
+        <result column="reservation_date" property="reservationDate"
+                typeHandler="org.apache.ibatis.type.LocalDateTypeHandler"/>
+        <result column="reservation_price" property="reservationPrice"/>
+        <result column="reservation_status" property="reservationStatus" javaType="java.lang.Integer"/>
+    </resultMap>
+
+    <!--查询满足条件的预约订单-->
+    <select id="select" resultMap="temp" parameterType="map">
+        SELECT reservation_id, u.user_id user_id, username, u.doctor_id doctor_id, d.doctor_name doctor_name,
+               reservation_date, de.department_name department_name, u.reservation_price reservation_price,
+               reservation_status
+        FROM user_hospital_reservation_info u
+        LEFT OUTER JOIN user_info user ON user.user_id=u.user_id
+        LEFT OUTER JOIN doctor_info d ON d.doctor_id=u.doctor_id
+        LEFT OUTER JOIN department_info de ON de.department_id=d.department_id
+        <where>
+            <if test="searchMap != null">
+                <foreach collection="searchMap.entrySet()" separator="and" index="key" item="value">
+                    u.${key} = #{value}
+                </foreach>
+            </if>
+        </where>
+        <if test="orderedKey != null and orderedKey != ''">
+            ORDER BY u.${orderedKey}
+        </if>
+        <if test="isDesc != null and isDesc">
+            DESC
+        </if>
+    </select>
+
+    <!--查找符合条件的医生的数量-->
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT COUNT(reservation_id) FROM user_hospital_reservation_info
+        <where>
+            <if test="searchMap != null">
+                <foreach collection="searchMap.entrySet()" separator="and" index="key" item="value">
+                    ${key} = #{value}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <!--添加预约订单的列表-->
+    <insert id="insert" parameterType="list">
+        INSERT IGNORE INTO
+        user_hospital_reservation_info(reservation_id, user_id, doctor_id, reservation_date,
+        reservation_price, reservation_status)
+        VALUES
+        <foreach collection="infos" open="(" close=")" separator="), (" item="item">
+            #{item.id}, #{item.userId}, #{item.doctorId}, #{item.reservationDate},
+            #{item.reservationPrice}, #{item.reservationStatus}
+        </foreach>
+    </insert>
+
+    <!--更新满足的条件的预约订单的信息-->
+    <update id="update" parameterType="map">
+        UPDATE user_hospital_reservation_info SET
+        <foreach collection="after.entrySet()" separator="," index="key" item="value">
+            ${key}=#{value}
+        </foreach>
+        <where>
+            <if test="before != null">
+                <foreach collection="before.entrySet()" separator="and" index="key" item="value">
+                    ${key}=#{value}
+                </foreach>
+            </if>
+        </where>
+    </update>
+
+    <!--删除满足一定条件的预约订单信息，需要之后进行封装，最好不要传空Map进来，不然会直接删除所有的数据-->
+    <delete id="delete" parameterType="map">
+        DELETE FROM user_hospital_reservation_info
+        <where>
+            <if test="deleteMap != null">
+                <foreach collection="deleteMap.entrySet()" separator="and" index="key" item="value">
+                    ${key}=#{value}
+                </foreach>
+            </if>
+        </where>
+    </delete>
+</mapper>

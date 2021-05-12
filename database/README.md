@@ -85,7 +85,7 @@
 | doctor_id          | bigint   | 20       | not null | 0      | 医生id，预约信息必须与某个医生链接才有意义            |
 | reservation_date   | date     | 1        | not null |        | 预约日期                                              |
 | reservation_price  | float    | (10, 2)  | not null | 0.0    | 预约价格                                              |
-| reservation_status | tingint  | 1        | not null | 0      | 订单状态，0未支付，1已支付，2已报道，3已处理，9已取消 |
+| reservation_status | tinyint  | 1        | not null | 0      | 订单状态，0未支付，1已支付，2已报道，3已处理，9已取消 |
 
 > 表名：user_medical_history
 

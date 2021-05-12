@@ -24,7 +24,7 @@ public interface IHospitalInfoService {
      * @param pageSize   Optional 页大小
      * @return 符合条件的医院信息列表
      */
-    CommonResult<Object> selectHospitalInfo(
+    CommonResult<?> selectHospitalInfo(
             Map<String, Object> map, Integer pageNum, Integer pageSize,
             String orderedKey, Boolean isDesc);
 
@@ -35,7 +35,7 @@ public interface IHospitalInfoService {
      * @param newValueMap 修改的值
      * @return 修改的结果
      */
-    CommonResult<Object> updateHospitalInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap);
+    CommonResult<?> updateHospitalInfo(Map<String, Object> selectKey, Map<String, Object> newValueMap);
 
     /**
      * 插入新的医院数据
@@ -43,7 +43,7 @@ public interface IHospitalInfoService {
      * @param hospitalInfos 医院数据列表
      * @return 插入的结果
      */
-    CommonResult<Object> insertHospitalInfo(List<HospitalInfo> hospitalInfos);
+    CommonResult<?> insertHospitalInfo(List<HospitalInfo> hospitalInfos);
 
     /**
      * 删除医院的数据
@@ -51,5 +51,5 @@ public interface IHospitalInfoService {
      * @param deleteKey 需要删除的医院数据
      * @return 删除的结果
      */
-    CommonResult<Object> deleteHospitalInfo(Map<String, Object> deleteKey);
+    CommonResult<?> deleteHospitalInfo(Map<String, Object> deleteKey);
 }
