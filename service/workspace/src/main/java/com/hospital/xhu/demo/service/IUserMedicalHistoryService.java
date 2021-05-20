@@ -1,6 +1,6 @@
 package com.hospital.xhu.demo.service;
 
-import com.hospital.xhu.demo.entity.UserMedicalHistory;
+import com.hospital.xhu.demo.entity.TempUserMedicalHistory;
 import com.hospital.xhu.demo.utils.CommonResult;
 
 import java.util.List;
@@ -30,6 +30,13 @@ public interface IUserMedicalHistoryService {
             String orderedKey, Boolean isDesc);
 
     /**
+     * 查询病例数量
+     * @param map 查询条件
+     * @return 查询的数量
+     */
+    CommonResult<?> selectCountUserMedicalHistory(Map<String, Object> map);
+
+    /**
      * 更新病例的数据
      *
      * @param selectKey 查询病例信息需要更新的值
@@ -44,7 +51,7 @@ public interface IUserMedicalHistoryService {
      * @param medicals 病例列表
      * @return 插入的结果
      */
-    CommonResult<?> insertUserMedicalHistory(List<UserMedicalHistory> medicals);
+    CommonResult<?> insertUserMedicalHistory(List<TempUserMedicalHistory> medicals);
 
     /**
      * 删除病例的数据

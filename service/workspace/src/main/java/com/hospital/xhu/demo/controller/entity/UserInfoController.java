@@ -3,12 +3,12 @@ package com.hospital.xhu.demo.controller.entity;
 import com.hospital.xhu.demo.entity.UserInfo;
 import com.hospital.xhu.demo.service.IUserService;
 import com.hospital.xhu.demo.utils.CommonResult;
-import com.hospital.xhu.demo.utils.annotation.PassToken;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,29 +27,6 @@ public class UserInfoController {
     @Resource(name="userService")
     private IUserService userService;
 
-    @PassToken
-    @PostMapping("login")
-    public CommonResult<?> userLogin(
-            @RequestParam("phone") Long phone,
-            @RequestParam("password") String password,
-            HttpServletResponse response) {
-        return userService.login(phone, password, response);
-    }
-
-    @PostMapping("logout")
-    public CommonResult<?> userLogout(
-            @RequestParam("phone") Long phone,
-            HttpServletResponse response) {
-        return userService.logout(phone, response);
-    }
-
-    @PassToken
-    @PostMapping("register")
-    public CommonResult<?> userRegister(
-            @RequestBody UserInfo userInfo) {
-        return userService.register(userInfo);
-    }
-
     @PostMapping("users")
     public CommonResult<?> selectUserInfo(
             @RequestBody(required = false) Map<String, Object> params) {
@@ -62,6 +39,16 @@ public class UserInfoController {
         String orderedKey = (String) params.getOrDefault("ordered", null);
         Boolean isDesc = (Boolean) params.getOrDefault("desc", null);
         return userService.selectUserInfo(p, pageNum, pageSize, orderedKey, isDesc);
+    }
+
+    @PostMapping("users/count")
+    public CommonResult<?> selectCountUserInfo(
+            @RequestBody(required = false) Map<String, Object> params) {
+        if (null == params) {
+            params = Collections.emptyMap();
+        }
+        Map<String, Object> p = (Map<String, Object>) params.getOrDefault("p", Collections.emptyMap());
+        return userService.selectCountUserInfo(p);
     }
 
     @PostMapping("users/update")

@@ -4,22 +4,27 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.hospital.xhu.demo.dao.IUserMedicalHistoryMapper">
-    <resultMap type="com.hospital.xhu.demo.entity.UserMedicalHistory" id="historyMap">
+    <resultMap type="com.hospital.xhu.demo.entity.TempUserMedicalHistory" id="historyMap">
         <id column="medical_history_id" property="id"/>
         <result column="user_id" property="userId"/>
+        <result column="username" property="username"/>
         <result column="doctor_id" property="doctorId"/>
+        <result column="doctor_name" property="doctorName"/>
         <result column="medical_history_date" property="medicalDate"/>
         <result column="medical_history_uri" property="medicalHistoryUri"/>
     </resultMap>
 
     <!--查询满足条件的用户病例-->
     <select id="select" resultMap="historyMap" parameterType="map">
-        SELECT medical_history_id, user_id, doctor_id, medical_history_date, medical_history_uri
-        FROM user_medical_history
+        SELECT medical_history_id, m.user_id user_id, u.username username, m.doctor_id doctor_id,
+               d.doctor_name doctor_name, medical_history_date, medical_history_uri
+        FROM user_medical_history m
+        LEFT OUTER JOIN user_info u on m.user_id = u.user_id
+        LEFT OUTER JOIN doctor_info d on m.doctor_id = d.doctor_id
         <where>
             <if test="searchMap != null">
                 <foreach collection="searchMap.entrySet()" separator="and" index="key" item="value">
-                    ${key} = #{value}
+                    m.${key} = #{value}
                 </foreach>
             </if>
         </where>

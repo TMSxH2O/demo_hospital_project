@@ -1,6 +1,7 @@
 package com.hospital.xhu.demo.service.impl;
 
 import com.hospital.xhu.demo.dao.impl.UserMedicalHistoryMapperImpl;
+import com.hospital.xhu.demo.entity.TempUserMedicalHistory;
 import com.hospital.xhu.demo.entity.UserMedicalHistory;
 import com.hospital.xhu.demo.exception.ProjectException;
 import com.hospital.xhu.demo.service.IUserMedicalHistoryService;
@@ -27,8 +28,8 @@ import java.util.Map;
 @Service
 @Slf4j
 public class UserMedicalHistoryServiceImpl implements IUserMedicalHistoryService {
-    private final UserMedicalHistoryMapperImpl userMedicalHistoryMapper;
     private static final String CLASS_INFO_NAME = "病例 user_medical_history";
+    private final UserMedicalHistoryMapperImpl userMedicalHistoryMapper;
 
     public UserMedicalHistoryServiceImpl(
             @Qualifier("userMedicalHistoryMapperImpl") UserMedicalHistoryMapperImpl userMedicalHistoryMapper) {
@@ -54,7 +55,7 @@ public class UserMedicalHistoryServiceImpl implements IUserMedicalHistoryService
             Map<String, Object> map, Integer pageNum, Integer pageSize,
             String orderedKey, Boolean isDesc) {
         try {
-            List<UserMedicalHistory> result =
+            List<TempUserMedicalHistory> result =
                     userMedicalHistoryMapper.select(map, orderedKey, isDesc, pageNum, pageSize);
             String msg =
                     CommonServiceMsg.SELECT_SUCCESS.getMsg(CLASS_INFO_NAME, map, orderedKey, isDesc, pageNum, pageSize);
@@ -64,11 +65,23 @@ public class UserMedicalHistoryServiceImpl implements IUserMedicalHistoryService
         }
     }
 
+    @Override
+    public CommonResult<?> selectCountUserMedicalHistory(Map<String, Object> map) {
+        try {
+            int result = userMedicalHistoryMapper.selectCount(map);
+            String msg =
+                    CommonServiceMsg.SELECT_COUNT_SUCCESS.getMsg(CLASS_INFO_NAME, map);
+            return new CommonResult<>(CommonCode.SUCCESS.getCode(), msg, result);
+        } catch (ProjectException e) {
+            return e.getResult();
+        }
+    }
+
     /**
      * 更新病例信息
      *
-     * @param selectKey   查询病例信息需要更新的值
-     * @param updateMap   修改的值
+     * @param selectKey 查询病例信息需要更新的值
+     * @param updateMap 修改的值
      * @return 更新的结果
      * - 成功
      * { code: 200, msg: 更新成功, data: 更新的数量 }
@@ -110,7 +123,7 @@ public class UserMedicalHistoryServiceImpl implements IUserMedicalHistoryService
      * { code: ExceptionCode, msg: 插入失败信息, data: null }
      */
     @Override
-    public CommonResult<?> insertUserMedicalHistory(List<UserMedicalHistory> medicals) {
+    public CommonResult<?> insertUserMedicalHistory(List<TempUserMedicalHistory> medicals) {
         if (CollectionUtils.isEmpty(medicals)) {
             return new CommonResult<>(
                     ExceptionCode.USER_MEDICAL_HISTORY.getCode(),

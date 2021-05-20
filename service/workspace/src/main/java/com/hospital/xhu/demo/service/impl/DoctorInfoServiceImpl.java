@@ -63,6 +63,18 @@ public class DoctorInfoServiceImpl implements IDoctorInfoService {
         }
     }
 
+    @Override
+    public CommonResult<?> selectCountDoctorInfo(Map<String, Object> map) {
+        try {
+            int result = doctorInfoMapper.selectCount(map);
+            String msg =
+                    CommonServiceMsg.SELECT_COUNT_SUCCESS.getMsg(CLASS_INFO_NAME, map);
+            return new CommonResult<>(CommonCode.SUCCESS.getCode(), msg, result);
+        } catch (ProjectException e) {
+            return e.getResult();
+        }
+    }
+
     /**
      * 查询指定科室下的医生列表
      *

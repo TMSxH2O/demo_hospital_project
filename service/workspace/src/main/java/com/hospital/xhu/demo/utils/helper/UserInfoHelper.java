@@ -3,6 +3,7 @@ package com.hospital.xhu.demo.utils.helper;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.hospital.xhu.demo.entity.UserInfo;
+import com.hospital.xhu.demo.properties.AdminProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.DigestUtils;
 
@@ -143,9 +144,25 @@ public class UserInfoHelper {
         // 过期时间
         Date end = new Date(endTime);
 
-        log.debug("生成log > [{}, {}] sign: {}", start, end, userInfo.getUserLoginSign());
+        log.debug("生成Token > [{}, {}] sign: {}", start, end, userInfo.getUserLoginSign());
         // 生成Token
         return JWT.create().withAudience(String.valueOf(userInfo.getId()), userInfo.getUsername())
                 .withIssuedAt(start).withExpiresAt(end).sign(Algorithm.HMAC256(sign));
+    }
+
+    /**
+     * 生成管理员登录的Token
+     *
+     * @param properties 管理员信息
+     * @return 生成的Token
+     */
+    public static String getToken(AdminProperties properties) {
+        java.util.Date start = new java.util.Date();
+        long endTime = start.getTime() + 60 * 60 * 1000;
+        java.util.Date end = new java.util.Date(endTime);
+
+        log.debug("生成Token > [{}, {}] sign: {}", start, end, properties);
+        return JWT.create().withAudience("", "", properties.getUsername())
+                .withIssuedAt(start).withExpiresAt(end).sign(Algorithm.HMAC256(properties.getPassword()));
     }
 }

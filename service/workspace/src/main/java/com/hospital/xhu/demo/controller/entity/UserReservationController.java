@@ -39,6 +39,16 @@ public class UserReservationController {
         return userReservationService.selectUserReservation(p, pageNum, pageSize, orderedKey, isDesc);
     }
 
+    @PostMapping("reservations/count")
+    public CommonResult<?> selectCountUserReservation(
+            @RequestBody(required = false) Map<String, Object> params) {
+        if (null == params) {
+            params = new HashMap<>(0);
+        }
+        Map<String, Object> p = (Map<String, Object>) params.getOrDefault("p", Collections.emptyMap());
+        return userReservationService.selectCountUserReservation(p);
+    }
+
     @PostMapping("reservations/update")
     public CommonResult<?> updateUserReservation(
             @RequestBody Map<String, Object> params) {

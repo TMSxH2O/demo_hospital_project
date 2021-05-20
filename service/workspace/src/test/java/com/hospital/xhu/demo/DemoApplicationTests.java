@@ -2,14 +2,13 @@ package com.hospital.xhu.demo;
 
 import com.hospital.xhu.demo.dao.IUserInfoMapper;
 import com.hospital.xhu.demo.dao.impl.DepartmentInfoMapperImpl;
-import com.hospital.xhu.demo.entity.UserInfo;
+import com.hospital.xhu.demo.dao.impl.UserMedicalHistoryMapperImpl;
 import com.hospital.xhu.demo.exception.ProjectException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +53,19 @@ class DemoApplicationTests {
 //    }
 //
     @Autowired
-DepartmentInfoMapperImpl departmentInfoMapper;
+    DepartmentInfoMapperImpl departmentInfoMapper;
+    @Autowired
+    UserMedicalHistoryMapperImpl userMedicalHistoryMapper;
+
+    @Test
+    void testMedicalHistory() {
+        try {
+            System.out.println(
+                    userMedicalHistoryMapper.select(Collections.emptyMap(), null, null, null, null));
+        } catch (ProjectException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     void testDepartmentMapper() {

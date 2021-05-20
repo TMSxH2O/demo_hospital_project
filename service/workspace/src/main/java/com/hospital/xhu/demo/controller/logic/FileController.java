@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -35,5 +37,16 @@ public class FileController {
     public CommonResult<?> generalTemplateFile(
             @RequestBody Map<String, Object> map) {
         return fileService.generalTemplateFile(map);
+    }
+
+    @PostMapping(value = "medical/preview", produces = "text/html;charset=UTF-8")
+    public void previewTemplateFile(
+            @RequestBody Map<String, String> map,
+            HttpServletResponse response) {
+        if (null == map) {
+            map = Collections.emptyMap();
+        }
+        String url = map.getOrDefault("url", null);
+        fileService.previewTemplateFile(url, response);
     }
 }

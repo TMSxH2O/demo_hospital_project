@@ -20,12 +20,12 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Data
 public class UserMedicalHistory implements Entity {
-    private Long id;
-    private Long userId;
-    private Long doctorId;
+    protected Long id;
+    protected Long userId;
+    protected Long doctorId;
     @DateTimeFormat(pattern="yyyy-MM-dd")
-    private LocalDate medicalDate;
-    private String medicalHistoryUri;
+    protected LocalDate medicalDate;
+    protected String medicalHistoryUri;
 
     @Override
     public void init() throws ProjectException {

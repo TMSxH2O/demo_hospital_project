@@ -26,6 +26,16 @@ public class DoctorInfoHelper {
     }
 
     /**
+     * 获得doctor_id的Map
+     *
+     * @param doctorName 所需查询的医生名
+     * @return { "doctorName": doctorName }
+     */
+    public static Map<String, Object> tempDoctorNameMap(String doctorName) {
+        return Collections.singletonMap("doctorName", doctorName);
+    }
+
+    /**
      * 获得departmentId的Map
      *
      * @param departmentId 所需查询的科室id

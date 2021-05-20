@@ -71,6 +71,18 @@ public class TempUserReservationServiceImpl implements ITempUserReservationServi
         }
     }
 
+    @Override
+    public CommonResult<?> selectCountUserReservation(Map<String, Object> map) {
+        try {
+            int result = userReservationMapper.selectCount(map);
+            String msg =
+                    CommonServiceMsg.SELECT_COUNT_SUCCESS.getMsg(CLASS_INFO_NAME, map);
+            return new CommonResult<>(CommonCode.SUCCESS.getCode(), msg, result);
+        } catch (ProjectException e) {
+            return e.getResult();
+        }
+    }
+
     /**
      * 更新预约订单信息
      *

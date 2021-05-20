@@ -1,7 +1,7 @@
 package com.hospital.xhu.demo.dao;
 
 import com.hospital.xhu.demo.dao.general.IGeneralMapper;
-import com.hospital.xhu.demo.entity.UserMedicalHistory;
+import com.hospital.xhu.demo.entity.TempUserMedicalHistory;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +14,5 @@ import org.springframework.stereotype.Repository;
  */
 @Mapper
 @Repository("userMedicalHistoryMapper")
-public interface IUserMedicalHistoryMapper extends IGeneralMapper<UserMedicalHistory> {
+public interface IUserMedicalHistoryMapper extends IGeneralMapper<TempUserMedicalHistory> {
 }

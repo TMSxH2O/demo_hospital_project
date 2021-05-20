@@ -30,6 +30,8 @@ public enum ExceptionCode {
     USER_RESERVATION(3005),
     // 用户病例信息相关错误
     USER_MEDICAL_HISTORY(3006),
+    // 管理员相关错误
+    ADMIN(3007),
     // 预约操作相关操作
     APPOINTMENT(4000),
     // 模板异常

@@ -2,6 +2,7 @@ package com.hospital.xhu.demo.controller.logic;
 
 import com.hospital.xhu.demo.service.IPaymentService;
 import com.hospital.xhu.demo.utils.CommonResult;
+import com.hospital.xhu.demo.utils.annotation.PassToken;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,12 +24,13 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-    @PostMapping("/page")
-    public CommonResult<?> redirectAlipay(
+    @PostMapping(value = "/page", produces = "text/html;charset=UTF-8")
+    public void redirectAlipay(
             @RequestParam("reservationId") String reservationId, HttpServletResponse response) {
-        return paymentService.redirectPaymentPage(reservationId, response);
+        paymentService.redirectPaymentPage(reservationId, response);
     }
 
+    @PassToken
     @GetMapping("/callback")
     public CommonResult<?> syncNotification(
             HttpServletRequest request) {

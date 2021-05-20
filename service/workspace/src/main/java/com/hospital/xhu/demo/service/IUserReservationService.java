@@ -30,6 +30,14 @@ public interface IUserReservationService {
             String orderedKey, Boolean isDesc);
 
     /**
+     * 查询预约订单信息
+     *
+     * @param map 查询条件
+     * @return 符合条件的预约订单信息列表
+     */
+    CommonResult<?> selectCountUserReservation(Map<String, Object> map);
+
+    /**
      * 更新预约订单的数据
      *
      * @param selectKey   查询预约订单信息需要更新的值

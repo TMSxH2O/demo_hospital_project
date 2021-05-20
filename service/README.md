@@ -342,12 +342,12 @@
 
 ### 支付接口
 
-| 支付     |                                                              | **<span style="color:red">待测试</span>**                    |
-| -------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| 接口URI  | alipay/page                                                  | 跳转支付包界面网页                                           |
-| 访问方式 | `POST`                                                       |                                                              |
-| 参数     | `{ "reservcationId": reservationId }`                        |                                                              |
-| 返回值   | - 成功 <br/>`{ code: 200, msg: 支付成功, data: 支付结果 }` <br/> - 失败 <br/>`{ code: ExceptionCode, msg: 支付失败, date: null }` | ExceptionCode 中错误码：<br/>3000: 数据库操作报错<br/>9996: 支付相关错误，可能是alipay接口出现的问题或是数据更新异常 |
+| 支付     |                                       | **<span style="color:red">待测试</span>**                    |
+| -------- | ------------------------------------- | ------------------------------------------------------------ |
+| 接口URI  | alipay/page                           | 跳转支付包界面网页                                           |
+| 访问方式 | `POST`                                |                                                              |
+| 参数     | `{ "reservcationId": reservationId }` |                                                              |
+| 返回值   | 支付宝界面                            | ExceptionCode 中错误码：<br/>3000: 数据库操作报错<br/>9996: 支付相关错误，可能是alipay接口出现的问题或是数据更新异常 |
 
 
 
@@ -358,35 +358,38 @@
 | 参数     | `{ "reservcationId": reservationId }`                        |                                                              |
 | 返回值   | - 成功 <br/>`{ code: 200, msg: 退款成功, data: 退款结果 }` <br/> - 失败 <br/>`{ code: ExceptionCode, msg: 退款失败, date: null }` | ExceptionCode 中错误码：<br/>3000: 数据库操作报错<br/>9996: 支付相关错误，可能是alipay接口出现的问题或是数据更新异常 |
 
+### 管理员接口
+
+| 管理员登录 |                                                              |                                                              |
+| ---------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 接口URI    | admin/login                                                  |                                                              |
+| 访问方式   | `POST`                                                       |                                                              |
+| 参数       | `{ "username": username, "password": password }`             |                                                              |
+| 返回值     | - 成功 <br/>`{ code: 200, msg: 登录成功, data: 登录成功 }` <br/> - 失败 <br/>`{ code: ExceptionCode, msg: 登录失败, date: null }` | ExceptionCode 中错误码：<br/>3000: 数据库操作报错<br/>3007: 管理员数据常规错误 |
+
 ## 功能分析图
 
 对系统中比较重要的接口流程进行分析
 
 ### 登录接口
 
-![login-sequence](img/login-sequence.svg)
+![login-sequence](https://cdn.jsdelivr.net/gh/TMSxH2O/tms_img/demo_hospital_project/login-sequence.svg)
 
-![login-activity](img/login-activity.svg)
+![login-activity](https://cdn.jsdelivr.net/gh/TMSxH2O/tms_img/demo_hospital_project/login-activity.svg)
 
 ### 预约接口
 
-![reservation-sequence](img/reservation-sequence.svg)
+![reservation-sequence](https://cdn.jsdelivr.net/gh/TMSxH2O/tms_img/demo_hospital_project/reservation-sequence.svg)
 
-![reservation-activity](img/reservation-activity.svg)
-
-
+![reservation-activity](https://cdn.jsdelivr.net/gh/TMSxH2O/tms_img/demo_hospital_project/reservation-activity.svg)
 
 ### 头像上传
 
-![file-update-sequence](img/file-update-sequence.svg)
+![file-update-sequence](https://cdn.jsdelivr.net/gh/TMSxH2O/tms_img/demo_hospital_project/file-update-sequence.svg)
 
-![file-update-activtiy](img/file-update-activtiy.svg)
+![file-update-activtiy](https://cdn.jsdelivr.net/gh/TMSxH2O/tms_img/demo_hospital_project/file-update-activtiy.svg)
 
-
-
-
-
-### 生成病例文件
+### 生成病例
 
 ![generate-medical-sequence](img/generate-medical-sequence.svg)
 

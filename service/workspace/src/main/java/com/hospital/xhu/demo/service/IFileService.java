@@ -3,6 +3,7 @@ package com.hospital.xhu.demo.service;
 import com.hospital.xhu.demo.utils.CommonResult;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 /**
@@ -28,4 +29,13 @@ public interface IFileService {
      * @return 生成模板文件
      */
     CommonResult<?> generalTemplateFile(Map<String, Object> map);
+
+    /**
+     * 预览病例文件
+     *
+     * @param reservationCode 预约订单号
+     * @param response        响应对象
+     * @return 预览的结果
+     */
+    CommonResult<?> previewTemplateFile(String reservationCode, HttpServletResponse response);
 }

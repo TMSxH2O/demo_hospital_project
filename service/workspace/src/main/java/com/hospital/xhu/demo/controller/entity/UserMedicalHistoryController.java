@@ -1,6 +1,6 @@
 package com.hospital.xhu.demo.controller.entity;
 
-import com.hospital.xhu.demo.entity.UserMedicalHistory;
+import com.hospital.xhu.demo.entity.TempUserMedicalHistory;
 import com.hospital.xhu.demo.service.IUserMedicalHistoryService;
 import com.hospital.xhu.demo.utils.CommonResult;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +41,16 @@ public class UserMedicalHistoryController {
         return userMedicalHistoryService.selectUserMedicalHistory(p, pageNum, pageSize, orderedKey, isDesc);
     }
 
+    @PostMapping("medicals/count")
+    public CommonResult<?> selectCountUserMedicalHistory(
+            @RequestBody(required = false) Map<String, Object> params) {
+        if (null == params) {
+            params = new HashMap<>(0);
+        }
+        Map<String, Object> p = (Map<String, Object>) params.getOrDefault("p", Collections.emptyMap());
+        return userMedicalHistoryService.selectCountUserMedicalHistory(p);
+    }
+
     @PostMapping("medicals/update")
     public CommonResult<?> updateUserMedicalHistory(
             @RequestBody Map<String, Object> params) {
@@ -51,7 +61,7 @@ public class UserMedicalHistoryController {
 
     @PostMapping("medicals/insert")
     public CommonResult<?> insertUserMedicalHistory(
-            @RequestBody List<UserMedicalHistory> list) {
+            @RequestBody List<TempUserMedicalHistory> list) {
         return userMedicalHistoryService.insertUserMedicalHistory(list);
     }
 

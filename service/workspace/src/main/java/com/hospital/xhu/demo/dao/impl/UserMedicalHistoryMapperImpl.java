@@ -1,9 +1,8 @@
 package com.hospital.xhu.demo.dao.impl;
 
 import com.hospital.xhu.demo.dao.IUserMedicalHistoryMapper;
-import com.hospital.xhu.demo.dao.general.IGeneralMapper;
 import com.hospital.xhu.demo.dao.general.impl.GeneralMapperImpl;
-import com.hospital.xhu.demo.entity.UserMedicalHistory;
+import com.hospital.xhu.demo.entity.TempUserMedicalHistory;
 import com.hospital.xhu.demo.utils.enumerate.ExceptionCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,7 +21,7 @@ import java.util.Map;
 @Repository
 @Slf4j
 public class UserMedicalHistoryMapperImpl
-        extends GeneralMapperImpl<UserMedicalHistory> {
+        extends GeneralMapperImpl<TempUserMedicalHistory> {
     /**
      * 存放类属性到数据库字段的映射
      */

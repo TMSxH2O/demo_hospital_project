@@ -30,6 +30,14 @@ public interface IDoctorInfoService {
             String orderedKey, Boolean isDesc);
 
     /**
+     * 查询医生数量
+     *
+     * @param map 符合条件的数量
+     * @return 符合条件的数据数量
+     */
+    CommonResult<?> selectCountDoctorInfo(Map<String, Object> map);
+
+    /**
      * 查询指定科室下的所有医生信息
      *
      * @param departmentId Optional 查询条件

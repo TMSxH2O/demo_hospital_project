@@ -1,7 +1,6 @@
 package com.hospital.xhu.demo.service;
 
 import com.hospital.xhu.demo.entity.TempUserReservation;
-import com.hospital.xhu.demo.entity.UserReservation;
 import com.hospital.xhu.demo.utils.CommonResult;
 
 import java.util.List;
@@ -28,6 +27,14 @@ public interface ITempUserReservationService {
     CommonResult<?> selectUserReservation(
             Map<String, Object> map, Integer pageNum, Integer pageSize,
             String orderedKey, Boolean isDesc);
+
+    /**
+     * 查询预约订单信息数量
+     *
+     * @param map 查询条件
+     * @return 符合条件的数量
+     */
+    CommonResult<?> selectCountUserReservation(Map<String, Object> map);
 
     /**
      * 更新预约订单的数据

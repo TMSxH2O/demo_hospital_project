@@ -29,6 +29,14 @@ public interface IHospitalInfoService {
             String orderedKey, Boolean isDesc);
 
     /**
+     * 查询医院信息数量
+     *
+     * @param map 查询条件
+     * @return 符合条件的数量
+     */
+    CommonResult<?> selectCountHospitalInfo(Map<String, Object> map);
+
+    /**
      * 更新医院的数据
      *
      * @param selectKey   查询医院信息需要更新的值

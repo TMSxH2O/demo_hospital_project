@@ -1,6 +1,8 @@
 package com.hospital.xhu.demo.config;
 
+import com.hospital.xhu.demo.properties.AdminProperties;
 import com.hospital.xhu.demo.utils.AuthenticationInterceptor;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -13,6 +15,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @version V1.0
  * @date 2021/5/4
  */
+@EnableConfigurationProperties(AdminProperties.class)
 @Configuration
 public class UserConfig implements WebMvcConfigurer {
     @Override

@@ -64,8 +64,9 @@ abstract public class GeneralMapperImpl<T extends Entity> {
         for (String key : map.keySet()) {
             if (tempRebuildMap.containsKey(key)) {
                 // 需要同时保证值不为空
-                if (null != map.get(key)) {
-                    result.put(tempRebuildMap.get(key), map.get(key));
+                Object value = map.get(key);
+                if (null != value && !"".equals(value)) {
+                    result.put(tempRebuildMap.get(key), value);
                 }
             }
             else {

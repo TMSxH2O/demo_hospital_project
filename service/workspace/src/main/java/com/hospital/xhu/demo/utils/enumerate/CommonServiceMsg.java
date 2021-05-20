@@ -10,6 +10,7 @@ package com.hospital.xhu.demo.utils.enumerate;
 public enum CommonServiceMsg {
     // 模板化各个返回msg输出
     SELECT_SUCCESS("查询[%s]成功 > {%s, %s, %b, %d, %d}"),
+    SELECT_COUNT_SUCCESS("查询[%s]成功 > {%s}"),
     SELECT_FAILED("查询[%s]失败 > %s"),
     UPDATE_MISSING_REQUIRED_INFO("更新[%s]的索引值和修改值都不能为空"),
     UPDATE_SUCCESS("更新[%s]成功"),
@@ -29,6 +30,7 @@ public enum CommonServiceMsg {
     TEMPLATE_FILE_NO_FOUND("没有找到对应的模板文件 > %s"),
     TEMPLATE_FAILED("模板输出异常 > %s"),
     TEMPLATE_UPDATE_SUCCESS("模板上传成功 > filename:%s"),
+    TEMPLATE_PREVIEW_SUCCESS("模板预览成功 > filename:%s"),
     PAYMENT_MISSING_REQUIRED_INFO("支付接口缺少了必要的数据 > %s"),
     PAYMENT_REDIRECT_SUCCESS("支付重定向成功"),
     PAYMENT_SUCCESS("支付成功 > %s %s"),

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -57,8 +58,10 @@ public class UserServiceImpl implements IUserService {
     public CommonResult<?> login(Long phone, String password, HttpServletResponse response) {
         // 传入的值都不能是空
         if (null == phone || StringUtils.isEmpty(password)) {
+            String msg = "登录的信息不能为空 > " + phone + ", " + password;
+            log.warn(msg);
             return new CommonResult<>(
-                    ExceptionCode.USER_INFO.getCode(), "登录的信息不能为空");
+                    ExceptionCode.USER_INFO.getCode(), msg);
         }
 
         try {
@@ -83,8 +86,11 @@ public class UserServiceImpl implements IUserService {
             if (!StringUtils.isEmpty(tempUserPassword) && tempUserPassword.equals(tempUserInfo.getPassword())) {
                 // 更新登录状态
                 String sign = updateLoginUserInfo(tempUserInfo, true);
+                // 创建token
+                Cookie cookie = new Cookie("token", UserInfoHelper.getToken(tempUserInfo, sign));
+                cookie.setMaxAge(10 * 60 * 1000);
                 // 添加Token
-                response.addHeader("token", UserInfoHelper.getToken(tempUserInfo, sign));
+                response.addCookie(cookie);
                 // 返回登录成功信息
                 return new CommonResult<>(CommonCode.SUCCESS.getCode(), "登录成功", tempUserInfo);
             } else {  // 密码不一致或者密码加密失败
@@ -118,7 +124,9 @@ public class UserServiceImpl implements IUserService {
             // 更新用户信息
             updateLoginUserInfo(userInfo, false);
             // 清理Token
-            response.setHeader("token", null);
+            Cookie cookie = new Cookie("token", null);
+            cookie.setMaxAge(0);
+            response.addCookie(cookie);
             return new CommonResult<>(CommonCode.SUCCESS.getCode(), "用户注销成功", userInfo);
         } catch (ProjectException e) {
             return e.getResult();
@@ -154,9 +162,8 @@ public class UserServiceImpl implements IUserService {
                 return new CommonResult<>(ExceptionCode.USER_INFO.getCode(), "已经存在相同的用户名，请重试");
             }
         } catch (ProjectException e) {
-            e.printStackTrace();
+            return e.getResult();
         }
-        return null;
     }
 
     /**
@@ -182,6 +189,17 @@ public class UserServiceImpl implements IUserService {
                     userInfoMapper.select(map, orderedKey, isDesc, pageNum, pageSize);
             String msg =
                     CommonServiceMsg.SELECT_SUCCESS.getMsg(CLASS_INFO_NAME, map, orderedKey, isDesc, pageNum, pageSize);
+            return new CommonResult<>(CommonCode.SUCCESS.getCode(), msg, result);
+        } catch (ProjectException e) {
+            return e.getResult();
+        }
+    }
+
+    @Override
+    public CommonResult<?> selectCountUserInfo(Map<String, Object> map) {
+        try {
+            int result = userInfoMapper.selectCount(map);
+            String msg = CommonServiceMsg.SELECT_COUNT_SUCCESS.getMsg(CLASS_INFO_NAME, map);
             return new CommonResult<>(CommonCode.SUCCESS.getCode(), msg, result);
         } catch (ProjectException e) {
             return e.getResult();

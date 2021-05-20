@@ -49,7 +49,8 @@ file:
   save_img_url: http://111.229.139.12:8080/img/
   # 保存病例文件路劲
   save_medical_path: /var/local/demo_hospital_project/template
-#  save_medical_path: F:/demo
+  # 保存病例文件的临时路径
+  save_temp_medical_path: /var/local/demo_hospital_project/temp
   # 病例文件的url
   save_medical_url: http://111.229.139.12:8080/template/
   # 使用的病例模板
@@ -66,14 +67,14 @@ pay:
     # 应用公钥
     alipayPublicKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnM/rISrdHr3jBZeoMUz64eWcgr1Tqhy0MklnfZsdk3w+xSDLX1uyCo8u2MnXceQ0mOSGsE4lLrjbvTr8drHPYy9FxdpHUl9xx/6kNAK6xD8B6J6PdVJy9UiL8iQxojBWG5C/bnm9dOFYQcZoQXiTIwFaFFaniSsfSD0FmfQIl3TIiE9tM1PbvYib5n+ux/D8Ie5wBDbA8D01Mdl/uSWV+bnbv0Uykw4ZPldV+xM6eCGiNEtMYPbQXu9vTSkpDnb0w4ejOwTl0X4hGrRgPN/duQOOmcM/SwyQ42uTq76W8+z+vZOooiAedekYZsgE0AUvCsJkaotWkQXXE8V7qoiWAQIDAQAB
     # 支付同步通知
-#    returnUrl: http://111.229.139.12:8080/alipay/callback
-    returnUrl: http://localhost:12301/alipay/callback
+    returnUrl: http://111.229.139.12:8080/alipay/callback
+#    returnUrl: http://localhost:12301/alipay/callback
     # 支付异步通知
-#    notifyUrl: http://111.229.139.12:8080/alipay/notify
-    notifyUrl: http://localhost:12301/alipay/notify
+    notifyUrl: http://111.229.139.12:8080/alipay/notify
+#    notifyUrl: http://localhost:12301/alipay/notify
     # 扫码支付成功后跳转的URL
-#    returnUrlForScan: http://111.229.139.12:8080/alipay/success
-    returnUrlForScan: http://localhost:12301/alipay/success
+    returnUrlForScan: http://111.229.139.12:8080/alipay/success
+#    returnUrlForScan: http://localhost:12301/alipay/success
     # 支付模型
     productCode: FAST_INSTANT_TRADE_PAY
 
@@ -82,6 +83,11 @@ pay:
 logging:
   level:
     root: debug
+
+admin:
+  info:
+    username: admin
+    password: admin
 
 ---
 spring:

@@ -57,6 +57,15 @@ public interface IUserService {
             String orderedKey, Boolean isDesc);
 
     /**
+     * 查询用户信息数量
+     *
+     * @param map 查询条件
+     * @return 符合条件的数据数量
+     */
+    CommonResult<?> selectCountUserInfo(
+            Map<String, Object> map);
+
+    /**
      * 更新用户的数据
      *
      * @param selectKey   查询用户需要更新的值

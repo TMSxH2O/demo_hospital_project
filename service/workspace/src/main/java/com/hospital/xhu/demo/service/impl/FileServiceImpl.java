@@ -1,26 +1,32 @@
 package com.hospital.xhu.demo.service.impl;
 
-import com.hospital.xhu.demo.dao.impl.FileCacheMapperImpl;
-import com.hospital.xhu.demo.entity.FileCache;
+import com.hospital.xhu.demo.dao.impl.*;
+import com.hospital.xhu.demo.entity.*;
 import com.hospital.xhu.demo.exception.ProjectException;
+import com.hospital.xhu.demo.properties.FileProperties;
 import com.hospital.xhu.demo.service.IFileService;
 import com.hospital.xhu.demo.utils.CommonResult;
 import com.hospital.xhu.demo.utils.enumerate.CommonCode;
 import com.hospital.xhu.demo.utils.enumerate.CommonServiceMsg;
 import com.hospital.xhu.demo.utils.enumerate.ExceptionCode;
+import com.hospital.xhu.demo.utils.helper.DoctorInfoHelper;
 import com.hospital.xhu.demo.utils.helper.FileCacheHelper;
+import com.hospital.xhu.demo.utils.helper.UserInfoHelper;
+import com.hospital.xhu.demo.utils.helper.UserReservationHelper;
+import com.hospital.xhu.demo.utils.payment.ReservationStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -36,45 +42,26 @@ import java.util.regex.Pattern;
  * @version V1.0
  * @date 2021/5/3
  */
-@Service
 @Slf4j
 public class FileServiceImpl implements IFileService {
 
     private static final String MEDICAL_SURNAME = ".htm";
-    private final FileCacheMapperImpl fileCacheMapper;
-    private final ResourceLoader resourceLoader;
-    @Value("${file.save_img_path}")
-    private String saveImagePath;
-    @Value("${file.save_img_url}")
-    private String imageUrl;
-    @Value(("${file.medical_template}"))
-    private String templateName;
-    @Value("${file.save_medical_path}")
-    private String saveMedicalFilePath;
-    @Value("${file.save_medical_url}")
-    private String medicalUrl;
-    private boolean isInitPath = false;
 
-    public FileServiceImpl(
-            FileCacheMapperImpl fileCacheMapper,
-            ResourceLoader resourceLoader) {
-        this.fileCacheMapper = fileCacheMapper;
-        this.resourceLoader = resourceLoader;
-    }
+    @Autowired
+    private FileCacheMapperImpl fileCacheMapper;
+    @Autowired
+    private ResourceLoader resourceLoader;
+    @Autowired
+    private UserInfoMapperImpl userInfoMapper;
+    @Autowired
+    private DoctorInfoMapperImpl doctorInfoMapper;
+    @Autowired
+    private UserMedicalHistoryMapperImpl userMedicalHistoryMapper;
+    @Autowired
+    private UserReservationMapperImpl userReservationMapper;
 
-    /**
-     * 运行一次，转化路径中的分隔符
-     */
-    private void tryInitFilePath() {
-        if (!isInitPath) {
-            // 将 \ 和 / 都转成 separator
-            String s = Matcher.quoteReplacement(File.separator);
-            saveImagePath = saveImagePath.replaceAll("[/\\\\]", s);
-            saveMedicalFilePath = saveMedicalFilePath.replaceAll("[/\\\\]", s);
-            log.debug("saveImagePath > {} saveMedicalFilePath > {}", saveImagePath, saveMedicalFilePath);
-            isInitPath = true;
-        }
-    }
+    @Autowired
+    private FileProperties fileProperties;
 
     /**
      * 上传文件
@@ -89,8 +76,6 @@ public class FileServiceImpl implements IFileService {
     @Override
     public CommonResult<?> updateImgFile(MultipartFile file) {
         try {
-            // 尝试初始化
-            tryInitFilePath();
             // 获取文件的sha256值
             String fileSha256 = DigestUtils.sha256Hex(file.getInputStream());
             String tempFileName = file.getOriginalFilename();
@@ -103,8 +88,8 @@ public class FileServiceImpl implements IFileService {
             String subFileType = tempFileName.toLowerCase().substring(tempFileName.lastIndexOf("."));
             String newFileName = fileSha256 + subFileType;
             // 拼接文件地址
-            String newFilePath = saveImagePath + File.separator + newFileName;
-            String tempFileUrl = imageUrl + newFileName;
+            String newFilePath = fileProperties.getSaveImgPath() + File.separator + newFileName;
+            String tempFileUrl = fileProperties.getSaveImgUrl() + newFileName;
 
             // 新建的文件对象
             FileCache fileCache = new FileCache(null, tempFileUrl, fileSha256);
@@ -119,9 +104,9 @@ public class FileServiceImpl implements IFileService {
             }
 
             // 检查路径是否存在
-            File saveFilePath = new File(saveImagePath);
+            File saveFilePath = new File(fileProperties.getSaveImgPath());
             if (!saveFilePath.isDirectory() && !saveFilePath.mkdirs()) {
-                String msg = CommonServiceMsg.FILE_PATH_ERROR.getMsg(saveImagePath);
+                String msg = CommonServiceMsg.FILE_PATH_ERROR.getMsg(fileProperties.getSaveImgPath());
                 log.warn(msg);
                 // 尝试删除缓存
                 deleteFileCacheAsync(fileSha256);
@@ -161,9 +146,6 @@ public class FileServiceImpl implements IFileService {
      */
     @Override
     public CommonResult<?> generalTemplateFile(Map<String, Object> map) {
-        // 尝试初始化
-        tryInitFilePath();
-
         if (null == map || !isValidTemplateParams(map)) {
             String msg = CommonServiceMsg.TEMPLATE_FILE_PARAM_ERROR.getMsg(map);
             log.warn(msg);
@@ -172,17 +154,21 @@ public class FileServiceImpl implements IFileService {
 
         // 使用订单号来作为文件名
         String reservationCode = String.valueOf(map.get("reservationCode"));
-        // 拼接文件名
-        String tempFileName = reservationCode + MEDICAL_SURNAME;
+        // 拼接保存的文件名
+        String newFileName = reservationCode + MEDICAL_SURNAME;
+        // 拼接临时文件名
+        String tempFile = reservationCode + ".htm";
         // 最终保存的文件路径
-        String newFilePath = saveMedicalFilePath + File.separator + tempFileName;
+        String newFilePath = fileProperties.getSaveMedicalPath() + File.separator + newFileName;
+        // 临时转换的文件
+        String tempFilePath = fileProperties.getSaveTempMedicalPath() + File.separator + tempFile;
         // 最终对应的文件地址
-        String newFileUrl = medicalUrl + tempFileName;
+        String newFileUrl = fileProperties.getSaveMedicalUrl() + newFileName;
 
         // 保存病例的文件
-        File filePath = new File(saveMedicalFilePath);
+        File filePath = new File(fileProperties.getSaveMedicalPath());
         if (!filePath.isDirectory() && !filePath.mkdirs()) {
-            String msg = CommonServiceMsg.FILE_PATH_ERROR.getMsg(saveMedicalFilePath);
+            String msg = CommonServiceMsg.FILE_PATH_ERROR.getMsg(fileProperties.getSaveMedicalPath());
             log.warn(msg);
             return new CommonResult<>(ExceptionCode.FILE_EXCEPTION.getCode(), msg);
         }
@@ -196,18 +182,35 @@ public class FileServiceImpl implements IFileService {
 
         log.debug("病例输出 > {}", newFilePath);
         try {
+            // 尝试更新订单状态，从已支付状态转换到已处理状态
+            Map<String, Object> userReservationMap = UserReservationHelper.tempUserReservationId(reservationCode);
+            UserReservationHelper.tempUserReservationStatusMap(userReservationMap, ReservationStatus.PAID.get());
+
+            Map<String, Object> newUserReservationStatusMap = UserReservationHelper.tempUserReservationStatusMap(
+                    null, ReservationStatus.PROCESSED.get());
+
+            // 判断更新的结果
+            int update = userReservationMapper.update(userReservationMap, newUserReservationStatusMap);
+
+            if (0 == update) {
+                String msg = CommonServiceMsg.UPDATE_FAILED.getMsg(
+                        "病例", userReservationMap, newUserReservationStatusMap);
+                log.warn(msg);
+                return new CommonResult<>(ExceptionCode.FILE_EXCEPTION.getCode(), msg);
+            }
+
             // 读取整个模板
             String buffer = IOUtils.toString(
-                    resourceLoader.getResource(templateName).getInputStream(),
+                    resourceLoader.getResource(fileProperties.getMedicalTemplate()).getInputStream(),
                     StandardCharsets.UTF_8);
 
-            for (String key: map.keySet()) {
+            for (String key : map.keySet()) {
                 Pattern pattern = FileCacheHelper.getStringPattern(key);
                 Matcher matcher = pattern.matcher(buffer);
                 Object value = map.get(key);
-                if (value instanceof String) {
+                if (value instanceof String || value instanceof LocalDate) {
                     buffer = matcher.replaceAll(String.valueOf(value));
-                } else if (value instanceof Map) {
+                }else if (value instanceof Map) {
                     try {
                         Map<String, String> temp = (Map<String, String>) value;
                         buffer = matcher.replaceAll(FileCacheHelper.generateMap(temp));
@@ -221,15 +224,85 @@ public class FileServiceImpl implements IFileService {
             }
             log.debug("测试输出 > {}", buffer);
 
-            // 保存到文件中
-            IOUtils.write(buffer, new FileOutputStream(newFilePath), StandardCharsets.UTF_8);
+            File newFile = new File(newFilePath);
+            FileUtils.write(newFile, buffer, StandardCharsets.UTF_8);
 
-            // 返回结果
-            String msg = CommonServiceMsg.TEMPLATE_UPDATE_SUCCESS.getMsg(tempFileName);
-            log.debug(msg);
-            return new CommonResult<>(CommonCode.SUCCESS.getCode(), msg, newFileUrl);
+            TempUserMedicalHistory history = new TempUserMedicalHistory();
+            // 查询用户
+            UserInfo userInfo = userInfoMapper.selectPrimary(
+                    UserInfoHelper.tempUsernameMap(String.valueOf(map.get("name"))));
+            history.setUserId(userInfo.getId());
+
+            // 查询医生
+            DoctorInfo doctorInfo = doctorInfoMapper.selectPrimary(
+                    DoctorInfoHelper.tempDoctorNameMap(String.valueOf(map.get("doctorName"))));
+            history.setDoctorId(doctorInfo.getId());
+
+            // 时间
+            Object medicalDate = map.get("medicalDate");
+            LocalDate date;
+            if (medicalDate instanceof String) {
+                date = LocalDate.parse(String.valueOf(medicalDate));
+            } else {
+                date = (LocalDate) medicalDate;
+            }
+            history.setMedicalDate(date);
+            history.setMedicalHistoryUri(newFileUrl);
+
+            int result = userMedicalHistoryMapper.insert(Collections.singletonList(history));
+
+            String msg;
+            if (1 == result) {
+                // 返回结果
+                msg = CommonServiceMsg.TEMPLATE_UPDATE_SUCCESS.getMsg(newFileName);
+                log.debug(msg);
+            } else {
+                msg = "病例已存在 > " + history;
+                log.warn(msg);
+            }
+            return new CommonResult<>(CommonCode.SUCCESS.getCode(), msg, history);
         } catch (IOException e) {
-            String msg = CommonServiceMsg.TEMPLATE_FILE_NO_FOUND.getMsg(templateName);
+            String msg = CommonServiceMsg.TEMPLATE_FILE_NO_FOUND.getMsg(fileProperties.getMedicalTemplate());
+            log.warn(msg);
+            log.error(e.getMessage());
+            return new CommonResult<>(ExceptionCode.FILE_EXCEPTION.getCode(), msg);
+        } catch (ProjectException e) {
+            return e.getResult();
+        }
+    }
+
+    /**
+     * 预览订单文件的方法
+     *
+     * @param url 预约订单号
+     * @param response        响应对象
+     * @return 将病例文件输出到响应体中
+     */
+    @Override
+    public CommonResult<?> previewTemplateFile(String url, HttpServletResponse response) {
+        if (StringUtils.isEmpty(url)) {
+            String msg = CommonServiceMsg.TEMPLATE_FILE_PARAM_ERROR.getMsg(
+                    "缺少必要参数 reservationCode" + url);
+            log.warn(msg);
+            return new CommonResult<>(ExceptionCode.FILE_EXCEPTION.getCode(), msg);
+        }
+
+        // 获取对应文件名
+        String templateName = FileCacheHelper.getTemplateNameByUrl(url);
+        String tempFileName = fileProperties.getSaveMedicalPath() + File.separator + templateName;
+
+        // 设置响应为html
+        response.setContentType("text/html;charset=utf-8");
+
+        try (final ServletOutputStream outputStream = response.getOutputStream()) {
+            // 读取文件内容到输出流
+            FileUtils.copyFile(new File(tempFileName), outputStream);
+
+            String msg = CommonServiceMsg.TEMPLATE_PREVIEW_SUCCESS.getMsg(url);
+            log.debug(msg);
+            return new CommonResult<>(CommonCode.SUCCESS.getCode(), msg, tempFileName);
+        } catch (IOException e) {
+            String msg = CommonServiceMsg.TEMPLATE_FILE_NO_FOUND.getMsg(tempFileName);
             log.warn(msg);
             log.error(e.getMessage());
             return new CommonResult<>(ExceptionCode.FILE_EXCEPTION.getCode(), msg);
@@ -278,7 +351,6 @@ public class FileServiceImpl implements IFileService {
             // 添加当前时间
             map.put("medicalDate", LocalDate.now());
         }
-        return map.containsKey("p") && map.containsKey("name") &&
-                map.containsKey("reservationCode") && map.containsKey("doctorName");
+        return map.containsKey("p") && map.containsKey("reservationCode");
     }
 }

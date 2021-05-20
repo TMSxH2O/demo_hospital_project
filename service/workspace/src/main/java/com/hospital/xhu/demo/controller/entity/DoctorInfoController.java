@@ -3,6 +3,7 @@ package com.hospital.xhu.demo.controller.entity;
 import com.hospital.xhu.demo.entity.DoctorInfo;
 import com.hospital.xhu.demo.service.IDoctorInfoService;
 import com.hospital.xhu.demo.utils.CommonResult;
+import com.hospital.xhu.demo.utils.annotation.PassToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +28,7 @@ public class DoctorInfoController {
     @Resource(name = "doctorInfoServiceImpl")
     private IDoctorInfoService doctorInfoService;
 
+    @PassToken
     @PostMapping("doctors")
     public CommonResult<?> selectDoctorInfo(
             @RequestBody(required = false) Map<String, Object> params) {
@@ -39,6 +41,17 @@ public class DoctorInfoController {
         String orderedKey = (String) params.getOrDefault("ordered", null);
         Boolean isDesc = (Boolean) params.getOrDefault("desc", null);
         return doctorInfoService.selectDoctorInfo(p, pageNum, pageSize, orderedKey, isDesc);
+    }
+
+    @PassToken
+    @PostMapping("doctors/count")
+    public CommonResult<?> selectCountDoctorInfo(
+            @RequestBody(required = false) Map<String, Object> params) {
+        if (null == params) {
+            params = Collections.emptyMap();
+        }
+        Map<String, Object> p = (Map<String, Object>) params.getOrDefault("p", Collections.emptyMap());
+        return doctorInfoService.selectCountDoctorInfo(p);
     }
 
     @PostMapping("department/doctors")

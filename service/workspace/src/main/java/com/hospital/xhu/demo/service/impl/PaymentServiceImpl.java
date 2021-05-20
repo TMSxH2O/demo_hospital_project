@@ -47,7 +47,6 @@ public class PaymentServiceImpl implements IPaymentService {
 
     private final PaymentProperties properties;
     private final AlipayClient alipayClient;
-    private final List<String> tradeList;
     private final List<String> refundList;
     @Value("${pay.subjectName}")
     private String subjectName;
@@ -60,7 +59,6 @@ public class PaymentServiceImpl implements IPaymentService {
             PaymentProperties properties, AlipayClient alipayClient) {
         this.properties = properties;
         this.alipayClient = alipayClient;
-        tradeList = new ArrayList<>();
         refundList = new ArrayList<>();
     }
 
@@ -75,12 +73,6 @@ public class PaymentServiceImpl implements IPaymentService {
     public CommonResult<?> redirectPaymentPage(String reservationId, HttpServletResponse response) {
         if (StringUtils.isEmpty(reservationId)) {
             String msg = CommonServiceMsg.PAYMENT_MISSING_REQUIRED_INFO.getMsg("reservationId: " + reservationId);
-            log.warn(msg);
-            return new CommonResult<>(ExceptionCode.PAYMENT_ERROR.getCode(), msg);
-        }
-
-        if (tradeList.contains(reservationId)) {
-            String msg = CommonServiceMsg.PAYMENT_FAILED.getMsg("请勿重复支付");
             log.warn(msg);
             return new CommonResult<>(ExceptionCode.PAYMENT_ERROR.getCode(), msg);
         }
@@ -111,9 +103,6 @@ public class PaymentServiceImpl implements IPaymentService {
                 writer.write(form);
                 writer.flush();
 
-                // 将订单号入队，防止重复支付
-                tradeList.add(reservationId);
-
                 // 支付跳转
                 String msg = CommonServiceMsg.PAYMENT_REDIRECT_SUCCESS.getMsg();
                 log.debug(msg);
@@ -137,7 +126,6 @@ public class PaymentServiceImpl implements IPaymentService {
     /**
      * 同步响应
      *
-     *
      * @param request@return 支付的结果
      */
     @Override
@@ -151,7 +139,7 @@ public class PaymentServiceImpl implements IPaymentService {
             return new CommonResult<>(ExceptionCode.PAYMENT_ERROR.getCode(), msg);
         }
 
-        if (!tradeList.contains(tradeNo) || !properties.getAppId().equals(appId)) {
+        if (!properties.getAppId().equals(appId)) {
             String msg = CommonServiceMsg.PAYMENT_FAILED.getMsg("订单号异常，请注意异常网络攻击");
             log.warn(msg);
             return new CommonResult<>(ExceptionCode.PAYMENT_ERROR.getCode(), msg);
@@ -175,14 +163,45 @@ public class PaymentServiceImpl implements IPaymentService {
             result = new CommonResult<>(CommonCode.SUCCESS.getCode(), "支付订单更新成功", map);
         }
 
-        // 不管支付成功或是失败，都将其移出正在支付列表
-        tradeList.remove(tradeNo);
         return result;
     }
 
     @Override
     public CommonResult<?> asyncNotification(HttpServletRequest request) {
-        return null;
+        String tradeNo = request.getParameter("out_trade_no");
+        String appId = request.getParameter("app_id");
+        if (StringUtils.isEmpty(tradeNo) || StringUtils.isEmpty(appId)) {
+            String msg = CommonServiceMsg.PAYMENT_MISSING_REQUIRED_INFO.getMsg(
+                    String.format("tradeNo: %s appId: %s", tradeNo, appId));
+            log.warn(msg);
+            return new CommonResult<>(ExceptionCode.PAYMENT_ERROR.getCode(), msg);
+        }
+
+        if (!properties.getAppId().equals(appId)) {
+            String msg = CommonServiceMsg.PAYMENT_FAILED.getMsg("订单号异常，请注意异常网络攻击");
+            log.warn(msg);
+            return new CommonResult<>(ExceptionCode.PAYMENT_ERROR.getCode(), msg);
+        }
+
+        // 尝试将对应的订单修改为已支付
+        Map<String, Object> userReservationIdMap = UserReservationHelper.tempUserReservationId(tradeNo);
+        UserReservationHelper.tempUserReservationStatusMap(userReservationIdMap, ReservationStatus.UNPAID.get());
+
+        // 修改为已支付
+        Map<String, Object> newReservationMap =
+                UserReservationHelper.tempUserReservationStatusMap(null, ReservationStatus.PAID.get());
+
+        CommonResult<?> result = userReservationService.updateUserReservation(userReservationIdMap, newReservationMap);
+
+        if (CommonCode.SUCCESS.getCode() == result.getCode()) {
+            // 修改成功的结果
+            Map<String, String> map = new HashMap<>(2);
+            map.put("out_trade_no", tradeNo);
+            map.put("app_id", appId);
+            result = new CommonResult<>(CommonCode.SUCCESS.getCode(), "支付订单更新成功", map);
+        }
+
+        return result;
     }
 
     /**

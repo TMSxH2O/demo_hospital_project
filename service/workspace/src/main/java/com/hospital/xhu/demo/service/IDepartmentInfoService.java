@@ -29,6 +29,13 @@ public interface IDepartmentInfoService {
             String orderedKey, Boolean isDesc);
 
     /**
+     * 查询医院科室数量
+     * @param map 查询条件
+     * @return 符合条件的数据数量
+     */
+    CommonResult<?> selectCountDepartmentInfo(Map<String, Object> map);
+
+    /**
      * 更新医院科室的数据
      *
      * @param selectKey   查询医院科室信息需要更新的值
